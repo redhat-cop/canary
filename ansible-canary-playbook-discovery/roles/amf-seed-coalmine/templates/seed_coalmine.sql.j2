@@ -1,0 +1,22 @@
+-- truncate parent_app CASCADE;
+
+{% set app_code = 1 %}
+{% for app in all_discovered_apps %}
+INSERT INTO parent_app(parent_app_name, eai_code, in_scope)
+VALUES ('{{ app.name }}', '{{ app_code }}', 't');
+{% set app_code = app_code + 1 %}
+{% endfor %}
+
+{#{% for host in legacy_hosts %}#}
+{% for host in ansible_play_hosts_all %}
+INSERT INTO server
+    (hostname, fqdn, sat_ipv4_addr, sat_name, parent_app_id)
+SELECT
+    '{{ host }}' as hostname,
+    '{{ host }}' as fqdn,
+    '{{ hostvars[host]["ansible_facts"].default_ipv4.address }}' as sat_ipv4_addr,
+    '{{ host }}' as sat_name,
+    parent_app.id as parent_app_id
+        FROM parent_app WHERE parent_app.parent_app_name = '{{ hostvars[host]["discovered_apps"][0].name }}';
+
+{% endfor %}

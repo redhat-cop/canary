@@ -1,0 +1,238 @@
+## {{ host | lower() }}'s Server Details
+| Hostname | FQDN | IPv4 Address | Operating System | Architecture | Discovered Running Applications | Environment |
+| --- | --- | --- | --- | --- | --- | --- |
+| {{ host | lower() }} | {{ hostvars[host]['discovered_facts']['fqdn'] | lower() }} | {{ hostvars[host]['discovered_facts']['default_ipv4']['address'] }} | {{ hostvars[host]['discovered_facts']['distribution'] }} {{ hostvars[host]['discovered_facts']['distribution_version'] }} | {{ hostvars[host]['discovered_facts']['architecture'] }} | {% for g in hostvars[host]['group_names'] %}{% if g != 'all' and g != 'ungrouped' and g not in legacy_groups | default([]) %}[{{ g | regex_replace('_', ' ') }}](../index.html#{{ g | regex_replace('_', ' ') | regex_replace('\s', '-') | lower() }})<br/>{% endif %}{% endfor %} | {% for g in hostvars[host]['group_names'] %}{% if g != 'all' and g != 'ungrouped' and g in report_legacy_groups %}[{{ g | regex_replace('_', ' ') }}](../index.html#{{ g | regex_replace('_','-') }})<br/>{% endif %}{% endfor %} |
+
+
+## {{ host | lower() }}'s System Resources
+| CPU Count | CPU Cores | CPU Type | RAM (MB) | RAM (GB) | Swap (MB) | Swap (GB) |
+| --- | --- | --- | --- | --- | --- | --- |
+| {{ hostvars[host]['discovered_facts']['processor_count'] }} | {{ hostvars[host]['discovered_facts']['processor_cores'] }} | {{ hostvars[host]['discovered_facts']['processor'] }} | {{ hostvars[host]['discovered_facts']['memtotal_mb'] }} | {{ hostvars[host]['discovered_facts']['memtotal_mb'] | int / 1024 }} | {{ hostvars[host]['discovered_facts']['swaptotal_mb'] }} | {{ hostvars[host]['discovered_facts']['swaptotal_mb'] | int / 1024 }} |
+
+
+## {{ host | lower() }}'s Storage Resources
+| Mount Point | Disk Size Total (MB) | Disk Size Total (GB) | Disk Size Free (MB) | Disk Size Free (GB) | Filesystem Type | System Device | Mount Options |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+{% for mount in hostvars[host]['discovered_facts']['mounts'] | sort(attribute='mount') %}
+{% if 'proc' not in mount['fstype'] and 'nfs' not in mount['fstype'] %}
+| {{ mount['mount'] }} | {{ mount['size_total'] | default(0) | float | human_readable(unit='M') }} | {{ mount['size_total'] | default(0) | float | human_readable(unit='G') }} | {{ mount['size_available'] | default(0) | float | human_readable(unit='M') }} | {{ mount['size_available'] | default(0) | human_readable(unit='G') }} | {{ mount['fstype'] }} | {{ mount['device'] }} | {{ mount['options'] }} |
+{% endif %}
+{% endfor %}
+
+
+### {{ host | lower() }}'s Logical Volume Group Configuration
+| Volume Group Name | Physical Volumes |
+| --- | --- |
+{% for g in hostvars[host]['discovered_facts']['vgs'] | dict2items | sort(attribute='key') %}
+| {{ g.key }} | {% for pv in g.value %}{{ pv['pv_name'] }}<br/>{% endfor %} |
+{% endfor %}
+
+
+### {{ host | lower() }}'s Logical Volume Configuration
+| Logical Volume Name | Label | Filesystem Type |
+| --- | --- | --- |
+{% for v in hostvars[host]['discovered_facts']['devices'] | dict2items | sort(attribute='key') %}
+{% if v.value['type'] == "Logical volume" %}
+| {{ v.key }} | {{ v.value['attributes']['label'] }} | {{ v.value['attributes']['type'] }} |
+{% endif %}
+{% endfor %}
+
+
+## {{ host | lower() }}'s Network Configuration
+| Interface | Protocol Version | Type | Device | Address | Net Mask | Network | Broadcast | MAC Address | MTU | Flags |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+{% for i in hostvars[host]['discovered_facts']['interfaces'] | sort() %}
+{# grab ipv4 data #}
+{% if hostvars[host]['discovered_facts'][i]['ipv4'] | length > 0 %}
+{% for ip in hostvars[host]['discovered_facts'][i]['ipv4'] %}
+| {{ i }} | IPv4 | {{ hostvars[host]['discovered_facts'][i]['type'] }} | {{ hostvars[host]['discovered_facts'][i]['device'] }} | {{ ip['address'] }} | {{ ip['netmask'] }} | {{ ip['network'] }} | {{ ip['broadcast'] }} | {{ hostvars[host]['discovered_facts'][i]['macaddress'] }} | {{ hostvars[host]['discovered_facts'][i]['mtu'] }} | {{ hostvars[host]['discovered_facts'][i]['flags'] | join('<br/>') }} |
+{% endfor %}
+{% endif %}
+{# grab ipv6 data #}
+{% if hostvars[host]['discovered_facts'][i]['ipv6'] | length > 0 %}
+{% for ip in hostvars[host]['discovered_facts'][i]['ipv6'] %}
+| {{ i }} | IPv6 | {{ hostvars[host]['discovered_facts'][i]['type'] }} | {{ hostvars[host]['discovered_facts'][i]['device'] }} | {{ ip['address'] }} | N/A | N/A | N/A | {{ hostvars[host]['discovered_facts'][i]['macaddress'] }} | {{ hostvars[host]['discovered_facts'][i]['mtu'] }} | {{ hostvars[host]['discovered_facts'][i]['flags'] | join('<br/>') }} |
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+
+## {{ host | lower() }}'s Name Server Configuration
+| Nameservers | Default Domain | Search Domains |
+| --- | --- | --- |
+| {% for ns in hostvars[host]['discovered_facts']['dns']['nameservers'] %}{{ ns }}<br/>{% endfor %} | {{ hostvars[host]['discovered_facts']['dns']['domain'] | default('') }} | {% if hostvars[host]['discovered_facts']['dns']['search'] is defined %}{% for sd in hostvars[host]['discovered_facts']['dns']['search'] %}{{ sd }}<br/>{% endfor %}{% else %}N/A{% endif %} |
+
+## {{ host | lower() }}'s Local Groups and Users
+### {{ host | lower() }}'s Local Groups
+| Group | GID | Members |
+| --- | --- | --- |
+{% for g in hostvars[host]['discovered_facts']['local_groups'] %}
+| {{ g['group'] }} | {{ g['gid'] }} | {% for m in g['members'] | sort() %}{{ m }}<br/>{% endfor %} |
+{% endfor %}
+
+
+### {{ host | lower() }}'s Local Users
+| User | UID | GID | Home | Shell | Comment |
+| --- | --- | --- | --- | --- | --- |
+{% for u in hostvars[host]['discovered_facts']['local_users'] %}
+| {{ u['user'] }} | {{ u['uid'] }} | {{ u['gid'] }} | {{ u['home'] }} | {{ u['shell'] }} | {{ u['comment'] }} |
+{% endfor %}
+
+
+## {{ host | lower() }}'s Environment Variables
+| Variable | Value |
+| --- | --- |
+{% for v in hostvars[host]['discovered_facts']['env'] | dict2items | sort(attribute='key') %}
+| {{ v.key }} | {{ v.value }} |
+{% endfor %}
+
+
+## {{ host | lower() }}'s Installed Packages
+| Package Name | Version | Description | Source |
+| --- | --- | --- | --- |
+{% for p in hostvars[host]['discovered_facts']['packages'] | dict2items | sort(attribute='key') %}
+{% if p.value | length() > 0 %}
+{% for v in p.value | sort(attribute='version') %}
+| {{ p.key }} | {{ v['version'] }} | {{ v['description'] }} | {{ v['source'] }} |
+{% endfor %}
+{% else %}
+| {{ p.key }} | {{ p.value[0]['version'] }} | {{ p.value[0]['description'] }} | {{ p.value[0]['source'] }} |
+{% endif %}
+{% endfor %}
+
+
+## {{ host | lower() }}'s Services
+| Service Name | State | Source |
+| --- | --- | --- |
+{% for s in hostvars[host]['discovered_facts']['services'] | dict2items | sort(attribute='key') %}
+| {{ s.key }} | {{ s.value['state'] }} | {{ s.value['source'] }} |
+{% endfor %}
+
+
+## {{ host | lower() }}'s Cron Schedules
+| Path | Command | Minute | Hour | Day of Month | Month | Day of Week |
+| --- | --- | --- | --- | --- | --- | --- |
+{% for p in hostvars[host]['discovered_facts']['cron']['files'] | sort(attribute='path') %}
+{# following condition to prevent empty configs from being reported #}
+{% if p.data.schedules | length > 0 and p.data.variables | length < 1 %}
+{% for s in p.data.schedules %}
+| {{ p.path }} | {{ s.command }} | {{ s.minute }} | {{ s.hour }} | {{ s.day_of_month }} | {{ s.month }} | {{ s.day_of_week }} |
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+
+{% if hostvars[host]['discovered_facts']['cron']['files'] | json_query('[*].data.variables[*]') | flatten | length > 0 %}
+## {{ host | lower() }}'s Cron Scripts
+| Path | Script Shell | Script Variables | Script Content |
+| --- | --- | --- | --- |
+{% for c in hostvars[host]['discovered_facts']['cron']['files'] | sort(attribute='path') %}
+{% if c['data']['variables'] | length > 0 %}
+| {{ c['path'] }} | {{ c['data']['shell'] }} | {% if c['data']['variables'] | length | int > 0 %}{% for v in c['data']['variables'] %}{{ v.name }}="{{ v.value }}"<br/>{% endfor %}{% else %}N/A{% endif %} | {{ c['configuration'] | join('<br/>') }} |
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
+## {{ host | lower() }}'s Sudo Configuration Details
+
+
+{% if hostvars[host]['discovered_facts']['sudoers'] | default({}) %}
+{% for f in hostvars[host]['discovered_facts']['sudoers']['sudoers_files'] %}
+### {{ host | lower() }}'s Sudo Defaults - {{ f['path'] }}
+| Sudoers File Path | Defaults |
+| --- | --- |
+{% if f['defaults'] is defined %}
+| {{ f['path'] }} | {% for d in f['defaults'] %}{{ d }}<br/>{% endfor %} |
+{% else %}
+| {{ f['path'] }} | N/A |
+{% endif %}
+
+
+### {{ host | lower() }}'s Sudo Command Aliases - {{ f['path'] }}
+| Sudoers File Path | Command Alias Name | Commands |
+| --- | --- | --- |
+{% if f['aliases']['cmnd_alias'] is defined %}
+{% for ca in f['aliases']['cmnd_alias'] %}
+| {{ f['path'] }} | {{ ca['name'] }} | {% for c in ca['commands'] %}'{{ c }}'<br/>{% endfor %} |
+{% endfor %}
+{% else %}
+| {{ f['path'] }} | N/A | N/A |
+{% endif %}
+
+
+### {{ host | lower() }}'s Sudo Host Aliases - {{ f['path'] }}
+| Sudoers File Path | Host Alias Name | Hosts |
+| --- | --- | --- |
+{% if f['aliases']['host_alias'] is defined %}
+{% for ha in f['aliases']['host_alias'] %}
+| {{ f['path'] }} | {{ ha['name'] }} | {% for h in ha['hosts'] %}'{{ h }}'<br/>{% endfor %} |
+{% endfor %}
+{% else %}
+| {{ f['path'] }} | N/A | N/A |
+{% endif %}
+
+
+### {{ host | lower() }}'s Sudo Run-As Aliases - {{ f['path'] }}
+| Sudoers File Path | Run-As Alias Name | Users |
+| --- | --- | --- |
+{% if f['aliases']['runas_alias'] is defined %}
+{% for ra in f['aliases']['runas_alias'] %}
+| {{ f['path'] }} | {{ ra['name'] }} | {% for u in ra['users'] %}'{{ u }}'<br/>{% endfor %} |
+{% endfor %}
+{% else %}
+| {{ f['path'] }} | N/A | N/A |
+{% endif %}
+
+
+### {{ host | lower() }}'s Sudo User Aliases - {{ f['path'] }}
+| Sudoers File Path | User Alias Name | Users |
+| --- | --- | --- |
+{% if f['aliases']['user_alias'] is defined %}
+{% for ua in f['aliases']['user_alias'] %}
+| {{ f['path'] }} | {{ ua['name'] }} | {% for u in ua['users'] %}'{{ u }}'<br/>{% endfor %} |
+{% endfor %}
+{% else %}
+| {{ f['path'] }} | N/A | N/A |
+{% endif %}
+
+
+### {{ host | lower() }}'s Sudo User Specifications - {{ f['path'] }}
+| Sudoers File Path | Users | Hosts | Operators | Tags | Commands |
+| --- | --- | --- | --- | --- | --- |
+{% for s in f['user_specifications'] %}
+{# prevent empty dicts #}
+{% if s['users'] is defined and s['hosts'] is defined and s['operators'] is defined and s['commands'] is defined %}
+| {{ f['path'] }} | {% if s['users'] is defined %}{% for u in s['users'] %}{{ u }}<br/>{% endfor %}{% endif %} | {% if s['hosts'] is defined %}{% for h in s['hosts'] %}{{ h }}<br/>{% endfor %}{% endif %} | {% if s['operators'] is defined %}{% for o in s['operators'] %}{{ o }}<br/>{% endfor %}{% endif %} | {% if s['tags'] is defined %}{% for t in s['tags'] %}{{ t }}<br/>{% endfor %}{% endif %} | {% if s['commands'] is defined %}{% for c in s['commands'] %}{{ c }}<br/>{% endfor %}{% endif %} |
+{% endif %}
+{% endfor %}
+{# End of sudoers data #}
+{% endfor %}
+{% else %}
+There was no Sudo configuration Discovered for this system.
+{% endif %}
+
+
+## {{ host | lower() }}'s Connecting Ports
+### UDP Connections
+{% if hostvars[host]['discovered_facts']['udp_listen'] | default([]) %}
+| Protocol | Address | State | Program Name | PID | Port | Type | User |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+{% for c in hostvars[host]['discovered_facts']['udp_listen'] | sort(attribute='type') %}
+| {{ c['protocol'] }} | {{ c['address'] }} | {{ c['state'] | default('') }} | {{ c['name'] }} | {{ c['pid'] }} | {{ c['port'] }} | {{ c['type'] }} | {{ c['user'] }} |
+{% endfor %}
+{% else %}
+There was no UDP Connection data obtained from this system.
+{% endif %}
+
+
+### TCP Connections
+{% if hostvars[host]['discovered_facts']['tcp_listen'] | default([]) %}
+| Protocol | Address | State | Program Name | PID | Port | Type | User |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+{% for c in hostvars[host]['discovered_facts']['tcp_listen'] | sort(attribute='type') %}
+| {{ c['protocol'] }} | {{ c['address'] }} | {{ c['state'] | default('') }} | {{ c['name'] }} | {{ c['pid'] }} | {{ c['port'] }} | {{ c['type'] }} | {{ c['user'] }} |
+{% endfor %}
+{% else %}
+There was no TCP Connection data obtained from this system.
+{% endif %}

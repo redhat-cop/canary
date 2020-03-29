@@ -1,0 +1,31 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/usr/tivoli/tsm/client"
+
+amf_as_packages:
+  - "tivoli.tsm.client.ba.64bit.base"
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "dsmcad"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "1"
+  packages: "1"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "TSM Backup-Archive Client"
+  desc: "Hosts identified as TSM Backup/Archive Client Servers"

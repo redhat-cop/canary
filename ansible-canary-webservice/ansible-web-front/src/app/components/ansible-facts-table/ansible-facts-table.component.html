@@ -1,0 +1,187 @@
+<mat-card class="page">
+  <mat-card-header>
+    <mat-card-title>General Facts</mat-card-title>
+  </mat-card-header>
+  <div class='hostname-field'>
+    <mat-form-field>
+      <input matTooltip="Enter a hostname to poll database" matTooltipPosition="right" type="text" placeholder="Hostname" aria-label="?" matInput [formControl]="control" [matAutocomplete]="autocrontabs">
+      <mat-autocomplete #autocrontabs="matAutocomplete">
+        <mat-option (onSelectionChange)="onSubmitHostname($event)" *ngFor="let hostname of filteredOptions | async" [value]="hostname">
+          {{ hostname }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field class='filter'>
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+    </mat-form-field>
+  </div>
+  <mat-card-header>
+      <mat-card-title>Crontab</mat-card-title>
+    </mat-card-header>
+  <mat-table #table [dataSource]="dataSourceCrontabs">
+    <ng-container matColumnDef="hour">
+      <mat-header-cell *matHeaderCellDef> Hour </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.hour}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="month">
+      <mat-header-cell *matHeaderCellDef> Month </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.month}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="command">
+      <mat-header-cell *matHeaderCellDef> Command </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.command}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="user">
+      <mat-header-cell *matHeaderCellDef> User </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.user}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="day">
+      <mat-header-cell *matHeaderCellDef> Day </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.day}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="minute">
+      <mat-header-cell *matHeaderCellDef> Minute </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.minute}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="weekday">
+      <mat-header-cell *matHeaderCellDef> Weekday </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.weekday}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="crontabsTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: crontabsTableColumns;"></mat-row>
+  </mat-table>
+  <mat-card-footer>
+    <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card-footer>
+</mat-card>
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>General Facts</mat-card-title>
+      </mat-card-header>
+<mat-table #table [dataSource]="dataSourceFacts">
+    <ng-container matColumnDef="ansible_distribution_version">
+      <mat-header-cell *matHeaderCellDef> Distribution Version </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_distribution_version}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ansible_processor_cores">
+      <mat-header-cell *matHeaderCellDef> Processor Cores </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_processor_cores}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ansible_memtotal_mb">
+      <mat-header-cell *matHeaderCellDef> Memory Total (mb) </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_memtotal_mb}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ansible_architecture">
+      <mat-header-cell *matHeaderCellDef> Architecture </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_architecture}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ansible_kernel">
+      <mat-header-cell *matHeaderCellDef> Kernel </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_kernel}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ansible_fqdn">
+      <mat-header-cell *matHeaderCellDef> FQDN </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.ansible_fqdn}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="factsTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: factsTableColumns;"></mat-row>
+  </mat-table>
+  <mat-card-footer>
+    <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card-footer>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Mounts</mat-card-title>
+      </mat-card-header>
+<mat-table #table [dataSource]="dataSourceMounts">
+    <ng-container matColumnDef="uuid">
+      <mat-header-cell *matHeaderCellDef> UUID </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.uuid}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="size_total">
+      <mat-header-cell *matHeaderCellDef> Size Total </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.size_total}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="mount">
+      <mat-header-cell *matHeaderCellDef> Mount </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.mount}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="size_available">
+      <mat-header-cell *matHeaderCellDef> Size Available </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.size_available}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="fstype">
+      <mat-header-cell *matHeaderCellDef> FS Type </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.fstype}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="device">
+      <mat-header-cell *matHeaderCellDef> Device </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.device}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="options">
+      <mat-header-cell *matHeaderCellDef> Options </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.options}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="mountsTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: mountsTableColumns;"></mat-row>
+  </mat-table>
+  <mat-card-footer>
+    <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card-footer>
+</mat-card>
+
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>LVMs</mat-card-title>
+      </mat-card-header>
+<mat-table #table [dataSource]="dataSourceLvms">
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.name}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="size_g">
+      <mat-header-cell *matHeaderCellDef> Size (G) </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.size_g}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="vg">
+      <mat-header-cell *matHeaderCellDef> VG </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.vg}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="lvmsTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: lvmsTableColumns;"></mat-row>
+  </mat-table>
+
+  <mat-card-footer>
+    <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card-footer>
+<mat-progress-spinner mode="indeterminate" *ngIf="loaded"></mat-progress-spinner>
+</mat-card>

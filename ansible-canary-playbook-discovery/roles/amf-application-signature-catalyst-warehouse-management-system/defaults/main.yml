@@ -1,0 +1,31 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users:
+    - "catalyst"
+  groups: []
+
+amf_as_paths:
+  - "/etc/catalyst"
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "catalyst"
+
+amf_as_scores:
+  users: "1"
+  groups: "0"
+  services: "0"
+  paths: "1"
+  packages: "0"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Catalyst Warehouse Management System"
+  desc: "Hosts identified as Catalyst Warehouse Management System Servers"

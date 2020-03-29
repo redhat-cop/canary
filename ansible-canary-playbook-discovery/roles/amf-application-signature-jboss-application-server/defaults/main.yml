@@ -1,0 +1,30 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users:
+    - "jboss"
+  groups: []
+
+amf_as_paths: []
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "jboss"
+
+amf_as_scores:
+  users: "1"
+  groups: "0"
+  services: "0"
+  paths: "0"
+  packages: "0"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "JBoss Application Server"
+  desc: "Hosts identified as JBoss Application Server Servers"

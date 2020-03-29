@@ -1,0 +1,19 @@
+- name: "Set role data for {{ role_to_run }}"
+  set_fact:
+    role_output:
+      role_name: "{{ role_to_run }}"
+      ansible_os_family: "{{ ansible_os_family }}"
+      ansible_distribution_version: "{{ ansible_distribution_version }}"
+
+- block:
+    - name: "Scan Custom | Unix/Linux | {{ role_to_run }}"
+      include_role:
+        name: "{{ role_to_run }}"
+
+  rescue:
+    - name: "Log error"
+      set_fact:
+        failed_roles: "{{ failed_roles | default([]) + [ role_output ] }}"
+
+    - name: "Reset server to continue dicovery"
+      meta: clear_host_errors

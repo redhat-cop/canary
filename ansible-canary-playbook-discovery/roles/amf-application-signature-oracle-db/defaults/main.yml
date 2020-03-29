@@ -1,0 +1,34 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/etc/oratab"
+  - "/etc/oraInst.loc"
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "ora_mmon_"
+  - "ora_pmon_"
+  - "ora_smon_"
+  - "tnslsnr"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "1"
+  packages: "0"
+  ports: "0"
+  processes: "3"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Oracle Database"
+  desc: "Hosts identified as Oracle Database Servers"

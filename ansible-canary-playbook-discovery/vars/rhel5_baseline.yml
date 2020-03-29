@@ -1,0 +1,7 @@
+---
+# Baseline lists for RHEL5
+discovery_rhel5_pkg_baseline: []
+discovery_rhel5_svc_baseline: []
+discovery_rhel5_port_baseline: []
+discovery_rhel5_user_baseline: []
+discovery_rhel5_group_baseline: []

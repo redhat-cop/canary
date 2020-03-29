@@ -1,0 +1,34 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/opt/universal"
+
+# not fully implemented yet, will probably need a name and version field
+## currently only takes a package name (no versions)
+amf_as_packages:
+  - "UNVubr.UNVubr.rte"
+
+# ports not implemented yet
+amf_as_ports: []
+
+amf_as_processes:
+  - "ubrokerd"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "1"
+  packages: "1"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Opswise Universal Agent "
+  desc: "Hosts identified as Opswise Universal Agent Servers"

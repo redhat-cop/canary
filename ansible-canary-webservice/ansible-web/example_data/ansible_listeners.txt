@@ -1,0 +1,44 @@
+{ "hostname": "lxrsv8", 
+ "ansible_listeners" : [
+                    {
+                        "protocol": "tcp",
+                        "local_port": "17472",
+                        "process": "TaniumClient",
+                        "pid": "22871",
+                        "foreign_address": "0.0.0.0",
+                        "state": "LISTEN",
+                        "foreign_port": "*",
+                        "local_address": "10.90.225.149"
+                    },
+                    {
+                        "protocol": "tcp",
+                        "local_port": "17473",
+                        "process": "TaniumClient",
+                        "pid": "22871",
+                        "foreign_address": "0.0.0.0",
+                        "state": "LISTEN",
+                        "foreign_port": "*",
+                        "local_address": "127.0.0.1"
+                    },
+                    {
+                        "protocol": "tcp",
+                        "local_port": "28002",
+                        "process": "avagent.bin",
+                        "pid": "3067",
+                        "foreign_address": "0.0.0.0",
+                        "state": "LISTEN",
+                        "foreign_port": "*",
+                        "local_address": "0.0.0.0"
+                    },
+                    {
+                        "protocol": "tcp",
+                        "local_port": "65443",
+                        "process": "nailsd",
+                        "pid": "4396",
+                        "foreign_address": "0.0.0.0",
+                        "state": "LISTEN",
+                        "foreign_port": "*",
+                        "local_address": "127.0.0.1"
+                    }
+	]
+}

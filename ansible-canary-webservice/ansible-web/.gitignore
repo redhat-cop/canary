@@ -1,0 +1,5 @@
+*.idea/
+com.redhat.ansible.web.parent/com.redhat.ansible.web.server/target/**
+/server2/target/
+/com.redhat.ansible.web.parent/server2/target/
+/com.redhat.ansible.web.parent/com.redhat.ansible.web.server2/target/

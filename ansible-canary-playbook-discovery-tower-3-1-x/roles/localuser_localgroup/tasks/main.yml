@@ -1,0 +1,43 @@
+---
+- name: get local users
+  shell: 'cat /etc/passwd'
+  register: user_result
+  changed_when: false
+
+- name: check if /etc/shadow exists
+  stat:
+    path: '/etc/shadow'
+  register: shadow_exist
+
+- name: check if /etc/shadow- exists
+  stat:
+    path: '/etc/shadow-'
+  register: shadow_changed
+
+- name: get local passwords
+  shell: 'cat /etc/shadow'
+  register: hash_result
+  when:
+    - shadow_exist.stat.exists == True
+
+- name: get local passwords
+  shell: 'cat /etc/shadow-'
+  register: hash_result
+  when:
+    - shadow_changed.stat.exists == True
+    - shadow_exists.stat.exists == False
+
+- name: get local groups
+  shell: 'cat /etc/group'
+  register: group_result
+  changed_when: false
+
+- name: parse local users, passwords, groups and merge for webservice format
+  usergroupparser:
+    userData: "{{ user_result.stdout_lines | to_json }}"
+    hashData: "{{ hash_result.stdout_lines | to_json }}"
+    groupData: "{{ group_result.stdout_lines }}"
+  register: result
+
+- set_fact:
+    local_users_groups: "{{ result }}"

@@ -1,0 +1,69 @@
+{
+  "hostname": "lxsrv8", 
+                    "users": [
+
+                        {
+
+                            "username": "root",
+
+                            "shadow_must_change": "99999",
+
+                            "encrypted_password": "x",
+
+                            "login_shell": "/bin/bash",
+
+                            "home_directory": "/root",
+
+                            "uid": "0",
+
+                            "gid": "0",
+
+                        },
+
+                        {
+
+                            "username": " bin",
+
+                            "shadow_must_change": "99999",
+
+                            "encrypted_password": "x",
+
+                            "login_shell": "/sbin/nologin",
+
+                            "home_directory": "/bin",
+
+                            "uid": "1",
+
+                            "gid": "1",
+
+                        }
+
+	],
+                  "groups": [
+
+                        {
+
+                            "gid": "0",
+
+                            "password": "x",
+
+                            "group_list": "root",
+
+                            "group_name": "root"
+
+                        },
+
+                        {
+
+                            "gid": "1",
+
+                            "password": "x",
+
+                            "group_list": "root,bin,daemon",
+
+                            "group_name": "bin"
+
+                        } 
+	]
+
+}

@@ -1,0 +1,122 @@
+---
+- name: "Ensure tower-cli is available in Ansible Tower virtual environment"
+  include_role:
+    name: "ansible_tower_genie_virtual_environments"
+  vars:
+    tower_venv_pylibs:
+      - "ansible-tower-cli"
+    tower_venv_path:
+      "/var/lib/awx/venv/ansible"
+  delegate_to: "localhost"
+  connection: "local"
+  run_once: True
+  when: 'discovered_host_install_prereqs'
+
+- name: "Ensure {{ discovered_host_inventory_name }} inventory exists in Ansible Tower"
+  tower_inventory:
+    tower_host: "{{ tower_url }}"
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    description: "{{ discovered_host_inventory_description }}"
+    organization: "{{ tower_org }}"
+    name: "{{ discovered_host_inventory_name }}"
+    state: "present"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+
+- name: "Ensure default inventory group exists in Ansible Tower Inventory"
+  tower_group:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ discovered_host_inventory_default_group.name }}"
+    description: "{{ discovered_host_inventory_default_group.desc }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    source: "manual"
+    state: "present"
+  delegate_to: "localhost"
+  connection: "local"
+  run_once: True
+  become: False
+
+- name: "Ensure discovered application inventory groups exist in Ansible Tower Inventory"
+  tower_group:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ item.name }}"
+    description: "{{ item.desc | default(omit) }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    source: "manual"
+    state: "present"
+  with_items: "{{ discovered_apps }}"
+  when: "discovered_apps | length > 0"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+
+- name: "Ensure discovered host and facts exist in Ansible Tower inventory"
+  tower_host:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ ansible_fqdn }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    enabled: True
+    variables:
+      discovered_facts: "{{ ansible_facts }}"
+    state: "present"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+
+- name: "Ensure discovered host is associated with discovered applications"
+  tower_host_manage_groups:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ ansible_fqdn }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    group: "{{ item.name }}"
+    state: "present"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+  with_items: "{{ discovered_apps }}"
+  when: "discovered_apps | length > 0"
+
+- name: "Ensure discovered host is associated with {{ discovered_host_inventory_default_group.name }}"
+  tower_host_manage_groups:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ ansible_fqdn }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    group: "{{ discovered_host_inventory_default_group.name }}"
+    state: "present"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+  when: "discovered_apps | length < 1"
+
+- name: "Ensure discovered host is not associated with {{ discovered_host_inventory_default_group.name }} from previous discovery"
+  tower_host_manage_groups:
+    tower_username: "{{ tower_user }}"
+    tower_password: "{{ tower_pass }}"
+    tower_host: "{{ tower_url }}"
+    tower_verify_ssl: "{{ tower_verify_ssl }}"
+    name: "{{ ansible_fqdn }}"
+    inventory: "{{ discovered_host_inventory_name }}"
+    group: "{{ discovered_host_inventory_default_group.name }}"
+    state: "absent"
+  delegate_to: "localhost"
+  connection: "local"
+  become: False
+  when: "discovered_apps | length > 0"

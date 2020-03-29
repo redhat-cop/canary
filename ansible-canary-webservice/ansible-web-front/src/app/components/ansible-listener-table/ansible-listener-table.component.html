@@ -1,0 +1,57 @@
+<mat-card class="page">
+  <mat-card-header>
+    <mat-card-title> Listeners </mat-card-title>
+  </mat-card-header>
+  <div class='hostname-field'>
+    <mat-form-field>
+      <input matTooltip="Enter a hostname to poll database" matTooltipPosition="right" type="text" placeholder="Hostname" aria-label="?" matInput [formControl]="control" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete">
+        <mat-option (onSelectionChange)="onSubmitHostname($event)" *ngFor="let hostname of filteredOptions | async" [value]="hostname">
+          {{ hostname }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field class='filter'>
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+    </mat-form-field>
+  </div>
+  <mat-table #table [dataSource]="dataSource">
+    <ng-container matColumnDef="protocol">
+      <mat-header-cell *matHeaderCellDef> Protocol </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.protocol}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="local_address">
+      <mat-header-cell *matHeaderCellDef> Local Address </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.local_address}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="local_port">
+      <mat-header-cell *matHeaderCellDef> Local Port </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.local_port}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="state">
+      <mat-header-cell *matHeaderCellDef> State </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.state}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="pid">
+      <mat-header-cell *matHeaderCellDef> PID </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.pid}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="process">
+      <mat-header-cell *matHeaderCellDef> Process </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.process}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="listenerTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: listenerTableColumns;"></mat-row>
+  </mat-table>
+  <mat-card-footer>
+  <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card-footer>
+<mat-progress-spinner mode="indeterminate" *ngIf="loaded"></mat-progress-spinner>
+</mat-card>

@@ -1,0 +1,6 @@
+---
+ws_db_name: "coalmine"
+ws_db_user: "coalmine"
+ws_user: "coalmine"
+ws_group: "coalmine"
+ws_user_home: "/home/{{ ws_user }}"

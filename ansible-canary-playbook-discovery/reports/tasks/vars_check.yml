@@ -1,0 +1,18 @@
+---
+- name: "{{ host }} | Check local_users"
+  debug:
+    msg: "{{ host }} | local_users is defined properly"
+  when:
+    - "hostvars[host]['discovered_facts']['local_users'] is defined"
+    - "host != 'localhost'"
+  ignore_errors: True
+
+- name: "{{ host }} | Check local_users data"
+  debug:
+    msg: "{{ host }} | user: {{ user['user'] }}, uid: {{ user['uid'] }}, gid: {{ user['gid'] }}, home: {{ user['home'] }}, shell: {{ user['shell'] }}, comment: {{ user['comment'] }}"
+  with_items: "{{ hostvars[host]['discovered_facts']['local_users'] }}"
+  loop_control:
+    loop_var: "user"
+    label: "{{ user['uid'] }}"
+  when: "host != 'localhost'"
+  ignore_errors: True

@@ -1,0 +1,20 @@
+<section fxLayout="column" fxLayoutAlign="start stretch">
+  <!-- TODO: make this into component and pass through toggle action -->
+  <mat-toolbar color="primary">
+    <button mat-icon-button (click)="sidenav.toggle()">
+      <mat-icon>view_headline</mat-icon>
+    </button>
+    <span> Ansible Migration Factory </span>
+    <span class="spacer"></span>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="side-panel-component container">
+    <mat-sidenav #sidenav mode="side" opened="true" [fixedInViewport]="true" [fixedTopGap]="64">
+        <app-side-panel> </app-side-panel>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</section>

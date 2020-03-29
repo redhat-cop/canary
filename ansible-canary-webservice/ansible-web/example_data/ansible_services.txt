@@ -1,0 +1,45 @@
+{
+ "hostname" : "lxvs6",
+ "services": [
+        {
+            "source": "sysv",
+            "state": "stopped",
+            "name": "NetworkManager"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "TaniumClient"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "acpid"
+        },
+        {
+            "source": "sysv",
+            "state": "stopped",
+            "name": "anacron"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "atd"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "auditd"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "autofs"
+        },
+        {
+            "source": "sysv",
+            "state": "running",
+            "name": "avagent"
+        }
+  ]
+}

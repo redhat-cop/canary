@@ -1,0 +1,262 @@
+---
+- name: "Ensure temporary directory gets cleaned during inventory creation"
+  block:
+    - name: "Ensure tower-cli is available in Ansible Tower virtual environment"
+      include_role:
+        name: "ansible_tower_genie_virtual_environments"
+        apply:
+          delegate_to: "localhost"
+          connection: "local"
+          become: False
+      vars:
+        tower_venv_pylibs:
+          - "ansible-tower-cli"
+        tower_venv_path: "/var/lib/awx/venv/ansible"
+      run_once: True
+      when: 'discovered_host_install_prereqs | bool'
+
+    - name: "Debug Tower API username"
+      debug:
+        var: "tower_user"
+        verbosity: "1"
+
+    - name: "Debug Tower API URL"
+      debug:
+        var: "tower_url"
+        verbosity: "1"
+
+    - name: "Debug Tower Verfify SSL boolean"
+      debug:
+        var: "tower_verify_ssl"
+        verbosity: "1"
+
+    - name: "Debug Tower organization"
+      debug:
+        var: "tower_org"
+        verbosity: "1"
+
+    - name: "Debug discovered host inventory name"
+      debug:
+        var: "discovered_host_inventory_name"
+        verbosity: "1"
+
+    - name: "Debug discovered host inventory description"
+      debug:
+        var: "discovered_host_inventory_description"
+        verbosity: "1"
+
+    - name: "Ensure {{ discovered_host_inventory_name }} inventory exists in Ansible Tower"
+      tower_inventory:
+        tower_host: "{{ tower_url }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        description: "{{ discovered_host_inventory_description }}"
+        organization: "{{ tower_org }}"
+        name: "{{ discovered_host_inventory_name }}"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+
+    - name: "Ensure default inventory group exists in Ansible Tower Inventory"
+      tower_group:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ discovered_host_inventory_default_group.name }}"
+        description: "{{ discovered_host_inventory_default_group.desc }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        source: "manual"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      run_once: True
+      become: False
+
+    - name: "Ensure discovered application inventory groups exist in Ansible Tower Inventory"
+      tower_group:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ item.name }}"
+        description: "{{ item.desc | default(omit) }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        source: "manual"
+        state: "present"
+      with_items:
+        - "{{ discovered_apps | default([]) }}"
+      when: "discovered_apps | length > 0"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+
+    - name: "Ensure legacy inventory groups exist in Ansible Tower Inventory"
+      tower_group:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ item }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        source: "manual"
+        state: "present"
+      with_items:
+        - "{{ legacy_groups | default([]) }}"
+      when:
+        # account for default ansible inventory groups
+        - "item != 'ungrouped'"
+        - "item != 'all'"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+
+    # - name: "Create temporary directory to store host variables"
+    #   tempfile:
+    #     state: "directory"
+    #   register: "temp_vars_dir"
+    #   delegate_to: "localhost"
+    #   connection: "local"
+    #   run_once: True
+    #   become: False
+    #
+    # - name: "Set temporary directory path"
+    #   set_fact:
+    #     vars_dir: "{{ temp_vars_dir.path }}"
+    #
+    # - debug:
+    #     var: "vars_dir"
+    #     verbosity: "1"
+
+    - name: "Ensure dump directory exists"
+      file:
+        path: "{{ vars_dir }}"
+        state: "directory"
+      delegate_to: "localhost"
+      connection: "local"
+      run_once: True
+      become: False
+
+    - name: "Dump collected facts to temporary directory"
+      template:
+        src: "vars_file.j2"
+        dest: "{{ vars_dir }}/{{ inventory_hostname }}.txt"
+        mode: "0777"
+        owner: "awx"
+        group: "awx"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+
+    - name: "Ensure discovered host and collected facts exist in Ansible Tower inventory"
+      tower_host:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ tower_client_node_name }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        enabled: True
+        variables: "@{{ vars_dir }}/{{ inventory_hostname }}.txt"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      register: "create_inv_host_result"
+      retries: 5
+      delay: 15
+      until: "create_inv_host_result is succeeded"
+      become: False
+
+    - debug:
+        var: "create_inv_host_result"
+        verbosity: "1"
+
+
+    - name: "Ensure discovered host is not associated with groups from previous discovery run"
+      tower_host_manage_groups:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ tower_client_node_name }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        group: "*"
+        state: "absent"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+      # when: "discovered_apps | length > 0"
+
+    - name: "Ensure discovered host is associated with discovered applications"
+      tower_host_manage_groups:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ tower_client_node_name }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        group: "{{ item.name }}"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+      with_items:
+        - "{{ discovered_apps | default([]) }}"
+      when: "discovered_apps | length > 0"
+
+    - name: "Ensure discovered host is associated with legacy groups"
+      tower_host_manage_groups:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ tower_client_node_name }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        group: "{{ item }}"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+      with_items:
+        - "{{ legacy_groups }}"
+      when:
+        # account for default ansible inventory groups
+        - "item != 'ungrouped'"
+        - "item != 'all'"
+
+    - name: "Ensure discovered host is associated with {{ discovered_host_inventory_default_group.name }}"
+      tower_host_manage_groups:
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        tower_host: "{{ tower_url }}"
+        tower_verify_ssl: "{{ tower_verify_ssl }}"
+        name: "{{ tower_client_node_name }}"
+        inventory: "{{ discovered_host_inventory_name }}"
+        group: "{{ discovered_host_inventory_default_group.name }}"
+        state: "present"
+      delegate_to: "localhost"
+      connection: "local"
+      become: False
+      when: "discovered_apps|default('') | length < 1"
+
+    # The following makes sure we have an app list for seeding the coalmine web-service
+    - name: "Ensure discovered host is associated with {{ discovered_host_inventory_default_group.name }}"
+      set_fact:
+        discovered_apps: "[{{ discovered_host_inventory_default_group }}]"
+      when: "discovered_apps|default([]) | length < 1"
+
+    - name: "Debug discovered applications list"
+      debug:
+        var: "discovered_apps"
+        verbosity: "1"
+
+  # always:
+  #   - name: "Cleanup temporary variables directory"
+  #     file:
+  #       path: "{{ vars_dir }}"
+  #       state: "absent"
+  #     delegate_to: "localhost"
+  #     run_once: True
+  #     become: False

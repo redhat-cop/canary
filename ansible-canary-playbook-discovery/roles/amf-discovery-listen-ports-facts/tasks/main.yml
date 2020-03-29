@@ -1,0 +1,28 @@
+---
+# Returns ansible_facts['tcp_listen'] and ansible_facts['udp_listen']
+- name: "Enterprise Linux"
+  block:
+    - name: "Ensure netstat is available on RHEL"
+      package:
+        name: "net-tools"
+        state: "installed"
+      become: True
+      when: "discovery_install_prereqs | bool"
+
+    - name: "Collect netstat facts"
+      listen_ports_facts:
+  when: "ansible_os_family == 'RedHat'"
+
+# Returns ansible_facts['listening_ports'] (for now)
+- name: "Collect listen_ports_facts | AIX"
+  ansible_fact.os_facts.listen_ports_facts:
+  when: (ansible_os_family == 'AIX') or
+        (ansible_os_family == 'Solaris')
+
+# Returns ansible_facts['tcp_listen'] and ansible_facts['udp_listen']
+- name: "Collect listen_ports_facts | Linux"
+  listen_ports_facts:
+  when:
+    - "ansible_os_family != 'AIX'"
+    - "ansible_os_family != 'Solaris'"
+    - "ansible_os_family != 'RedHat'"

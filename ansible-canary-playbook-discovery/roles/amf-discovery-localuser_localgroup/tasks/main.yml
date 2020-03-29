@@ -1,0 +1,5 @@
+---
+- name: "Collect local user and local group facts"
+  user_group_facts:
+
+# returns ansible_facts['local_users'] and ansible_facts['local_groups']

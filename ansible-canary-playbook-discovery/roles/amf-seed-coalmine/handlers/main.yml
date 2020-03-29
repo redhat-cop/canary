@@ -1,0 +1,9 @@
+---
+- name: "Seed postgresql"
+  postgresql_db:
+    name: "{{ ws_db_name }}"
+    state: "restore"
+    target: "{{ pg_home }}/seed_coalmine.sql"
+  delegate_to: "{{ amf_webservice_host }}"
+  become: True
+  become_user: "{{ pg_user }}"

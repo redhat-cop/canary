@@ -1,0 +1,43 @@
+---
+- name: "Build custom facts"
+  set_fact:
+    custom_facts_formatted:
+      # - {sudoers: "{{ sudoers }}"}
+      # - {user_group: {users: "{{ local_users }}", groups: "{{ local_groups }}"}}
+      # - {local_users: "{{ local_users }}"}
+      # - {local_groups: "{{ local_groups }}"}
+      - {listeners: "{{ listeners }}"}
+      - {processes: "{{ processes }}"}
+      - {repo_list: "{{ yum_repo_list }}"}
+      - {cron_jobs: "{{ cron_jobs }}"}
+      - {user_group: "{{ local_users_groups.meta.user_group }}"}
+
+- name: "Debug Custom formatted facts"
+  debug:
+    var: "custom_facts_formatted"
+    verbosity: "1"
+
+- name: "Ensure data is prepared for Coalmine"
+  convertWebService:
+    ansible_facts: "{{ ansible_facts }}"
+    parent_app_name: "Unknown Application"
+    hostname: "{{ inventory_hostname }}"
+    custom_facts_list: "{{ custom_facts_formatted }}"
+  register: "coalmine_data"
+
+- name: "Debug formatted Coalmine data"
+  debug:
+    var: "coalmine_data"
+    # verbosity: "1"
+
+- name: "Push data to Coalmine web-service"
+  uri:
+    url: "http://{{ amf_webservice_host }}:8080/v1/ansible/web/servers/{{ inventory_hostname | lower }}/insertAnsibleData"
+    method: "POST"
+    body_format: "json"
+    body: "{{ coalmine_data.meta }}"
+    validate_certs: False
+  register: "coalmine_push_results"
+
+- debug:
+    var: "coalmine_push_results"

@@ -1,0 +1,19 @@
+mat-card-footer{
+    display: inline;  
+   }
+
+   .mat-card-title{
+    font-size: 22px;
+}
+
+.mat-card-header{
+    font-size: 22px;
+}
+
+.filter{
+    float: right;
+}
+
+mat-card.page{
+    margin-top: 50px;
+}

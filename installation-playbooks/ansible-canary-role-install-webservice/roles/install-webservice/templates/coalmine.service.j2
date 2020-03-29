@@ -1,0 +1,13 @@
+[Unit]
+Description=Coalmine
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart={{ wildfly_home }}/bin/standalone.sh -b=0.0.0.0
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target

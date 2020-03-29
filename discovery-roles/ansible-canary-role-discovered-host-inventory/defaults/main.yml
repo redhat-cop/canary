@@ -1,0 +1,12 @@
+---
+discovered_host_install_prereqs: False
+discovered_host_inventory_name: "Discovered Hosts"
+discovered_host_inventory_description: "Inventory of hosts scanned by the Ansible Migration Factory Discovery playbook"
+discovered_host_inventory_default_group:
+  name: "Unknown Application"
+  desc: "Hosts running applications or services that we could not identify"
+tower_user: ""
+tower_pass: ""
+tower_url: ""
+tower_org: ""
+tower_verify_ssl: False

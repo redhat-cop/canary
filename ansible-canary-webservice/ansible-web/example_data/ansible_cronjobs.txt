@@ -1,0 +1,89 @@
+{
+  "hostname" : "lxrsv8", 
+   "cron_jobs": {
+
+                    "cronfiles": [
+
+                        "/etc/cron.hourly/mcelog.cron",
+
+                        "/etc/cron.daily/makewhatis.cron",
+
+                        "/etc/cron.daily/rpm",
+
+                        "/etc/cron.daily/prelink",
+
+                        "/etc/cron.daily/mlocate.cron",
+
+                        "/etc/cron.daily/logrotate",
+
+                        "/etc/cron.daily/tmpwatch",
+
+                        "/etc/cron.daily/0anacron",
+
+                        "/etc/cron.weekly/makewhatis.cron",
+
+                        "/etc/cron.weekly/0anacron",
+
+                        "/etc/cron.monthly/0anacron"
+
+                    ],
+
+                    "var_spool": [],
+
+                    "crontab": [
+
+                        {
+
+                            "hour": "*",
+
+                            "month": "*",
+
+                            "command": "run-parts /etc/cron.hourly",
+
+                            "user": "root",
+
+                            "day": "*",
+
+                            "minute": "01",
+
+                            "weekday": "*"
+
+                        },
+
+                        {
+
+                            "hour": "4",
+
+                            "month": "*",
+
+                            "command": "run-parts /etc/cron.daily",
+
+                            "user": "root",
+
+                            "day": "*",
+
+                            "minute": "02",
+
+                            "weekday": "*"
+
+                        },
+
+                        {
+
+                            "hour": "4",
+
+                            "month": "*",
+
+                            "command": "run-parts /etc/cron.weekly",
+
+                            "user": "root",
+
+                            "day": "*",
+
+                            "minute": "22",
+
+                            "weekday": "0"
+
+                        }
+	}
+}

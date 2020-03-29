@@ -1,0 +1,48 @@
+---
+# RHEL7 tested
+ws_directories:
+  - "{{ ws_user_home }}/webservice/install/ng"
+  - "{{ ws_user_home }}/webservice/install/java"
+  - "{{ ws_user_home }}/csvdata/in/server/post"
+  - "{{ ws_user_home }}/csvdata/in/server/update"
+  - "{{ ws_user_home }}/csvdata/in/questionnaire/post"
+  - "{{ ws_user_home }}/csvdata/in/questionnaire/update"
+  - "{{ ws_user_home }}/csvdata/out"
+
+rht_repos:
+  - "rhel-server-rhscl-7-rpms"
+  - "rhel-7-server-rpms"
+
+ws_pkgs:
+  - "git"
+  - "rh-postgresql96-postgresql-server.x86_64"
+  - "python-psycopg2"
+  - "sassc"
+  - "npm"
+  - "java-1.8.0-openjdk"
+  - "java-1.8.0-openjdk-devel"
+
+maven_url: "http://www.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz"
+maven_install_path: "/opt/maven"
+ws_apache_pkg: "httpd"
+ws_apache_svc: "httpd"
+postgres_jdbc_version: "42.2.5"
+postgres_jdbc_driver: "postgresql-{{ postgres_jdbc_version }}.jar"
+postgres_jdbc_md5: "47d66d83f9894ebbb18df20d9ad2e5d3"
+postgres_jdbc_download_url: "https://jdbc.postgresql.org/download/{{ postgres_jdbc_driver }}"
+#wildfly_version: "14.0.1"
+wildfly_version: "15.0.1"
+wildfly_download_url: "https://download.jboss.org/wildfly/{{ wildfly_version }}.Final/wildfly-{{ wildfly_version }}.Final.tar.gz"
+wildfly_home: "{{ ws_user_home }}/wildfly-{{ wildfly_version }}.Final"
+#15.0.1:
+wildfly_md5: "77fc4b0313ca678cfef64084a0520aa7"
+#14.0.1:
+#wildfly_md5: "85caaab6ff0e729a9a92d49ddfb7d162"
+#postgres_home: "/var/lib/pgsql/data"
+postgres_home: "/var/opt/rh/rh-postgresql96/lib/pgsql/data"
+postgres_service: "rh-postgresql96-postgresql.service"
+coalmine_mvn_target: "{{ ws_user_home }}/webservice/install/java/com.redhat.ansible.web.parent/com.redhat.ansible.web.server2/target"
+ws_fw_ports:
+  - "80/tcp" #nodejs frontend
+  - "8080/tcp" #camel/wildfly
+  - "8443/tcp" #camel/wildfly

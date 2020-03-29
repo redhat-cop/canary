@@ -1,0 +1,7 @@
+---
+# Baseline lists for RHEL7
+discovery_rhel7_pkg_baseline: []
+discovery_rhel7_svc_baseline: []
+discovery_rhel7_port_baseline: []
+discovery_rhel7_user_baseline: []
+discovery_rhel7_group_baseline: []

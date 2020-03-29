@@ -1,0 +1,60 @@
+<mat-card class="page">
+  <mat-card-header>
+    <mat-card-title> Applications </mat-card-title>
+  </mat-card-header>
+  <div class='eai-field'>
+    <mat-form-field>
+      <input matTooltip="Enter an application name to poll database" matTooltipPosition="right" type="text" placeholder="Application" aria-label="?" matInput [formControl]="control" [matAutocomplete]="autogroup">
+      <mat-autocomplete #autogroup="matAutocomplete">
+        <mat-option (onSelectionChange)="onSubmitAppCode($event)" *ngFor="let appcode of filteredOptions | async" [value]="appcode">
+          {{ appcode }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field class='filter'>
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+    </mat-form-field>
+  </div>
+  <mat-table #table [dataSource]="dataSource">
+    <ng-container matColumnDef="app">
+      <mat-header-cell *matHeaderCellDef> Application</mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.parent_app_name}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="eai">
+      <mat-header-cell *matHeaderCellDef> Application Code </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.appcode}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="hostname">
+      <mat-header-cell *matHeaderCellDef> Hostname </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.hostname}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="ip">
+      <mat-header-cell *matHeaderCellDef> IPv4 Address </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.sat_ipv4_addr}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="fqdn">
+      <mat-header-cell *matHeaderCellDef> FQDN </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.fqdn}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="migration_status">
+      <mat-header-cell *matHeaderCellDef> Migration Status </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.replace_status}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="dest_host">
+      <mat-header-cell *matHeaderCellDef> Destination Host </mat-header-cell>
+      <mat-cell *matCellDef="let appData"> {{appData.dest_host}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="appTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: appTableColumns;"></mat-row>
+  </mat-table>
+  <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+  <mat-progress-spinner mode="indeterminate" *ngIf="loaded"></mat-progress-spinner>
+</mat-card>

@@ -1,0 +1,33 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users:
+    - "sas"
+  groups:
+    - "sas"
+
+amf_as_paths: []
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "startSMPS.sh"
+  - "httpd.worker"
+  - "SASWebServer"
+
+amf_as_scores:
+  users: "1"
+  groups: "1"
+  services: "0"
+  paths: "0"
+  packages: "0"
+  ports: "0"
+  processes: "3"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "SAS Intelligent Planning Suite"
+  desc: "Hosts identified as SAS Intelligent Planning Suite Servers"

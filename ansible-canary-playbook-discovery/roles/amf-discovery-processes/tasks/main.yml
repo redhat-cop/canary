@@ -1,0 +1,6 @@
+---
+- name: "Collect running process facts"
+  process_facts:
+    output_ps_stdout_lines: "{{ proc_stdout | bool }}"
+
+# proccess_facts module returns ansible_facts['processes'] json

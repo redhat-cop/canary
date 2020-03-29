@@ -1,0 +1,27 @@
+---
+- name: "Converge data"
+  set_fact:
+    all_discovered_apps: "{{ hostvars | json_query('*.discovered_apps') | flatten }}"
+  run_once: True
+  delegate_to: "localhost"
+
+- name: "Debug all discovered apps"
+  debug:
+    var: "all_discovered_apps"
+    verbosity: "1"
+
+- name: "Build coalmine SQL"
+  template:
+    src: "seed_coalmine.sql.j2"
+    dest: "{{ pg_home }}/seed_coalmine.sql"
+    mode: "0600"
+    group: "{{ pg_group }}"
+    owner: "{{ pg_user }}"
+  delegate_to: "{{ amf_webservice_host }}"
+  run_once: True
+  notify:
+    - "Seed postgresql"
+
+# Make sure we run the role's handlers before moving on to other roles
+- name: "Run Coalmine handlers"
+  meta: "flush_handlers"

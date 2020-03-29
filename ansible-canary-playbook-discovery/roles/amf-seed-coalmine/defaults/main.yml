@@ -1,0 +1,4 @@
+---
+pg_user: "postgres"
+pg_group: "postgres"
+pg_home: "/var/lib/postgres"

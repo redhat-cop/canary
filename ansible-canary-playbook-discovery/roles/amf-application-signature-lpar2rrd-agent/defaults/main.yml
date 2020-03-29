@@ -1,0 +1,32 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users:
+    - "lpar2rrd"
+  groups: []
+
+amf_as_paths:
+  - "/opt/lpar2rrd-agent/"
+
+amf_as_packages:
+  - "lpar2rrd-agent"
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "lpar2rrd-agent.pl"
+
+amf_as_scores:
+  users: "1"
+  groups: "0"
+  services: "0"
+  paths: "1"
+  packages: "1"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "LPAR2RRD Agent"
+  desc: "Hosts identified as LPAR2RRD Agent Servers"

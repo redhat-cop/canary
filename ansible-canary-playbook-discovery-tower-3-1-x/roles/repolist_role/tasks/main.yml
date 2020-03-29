@@ -1,0 +1,17 @@
+---
+# tasks file for rpmdiff
+
+#Get yum repolist, remove column headers and last line that gives sum.
+# Remove the head portion to make work with dnf command
+- name: get repolist
+  shell: 'yum repolist |  awk "{if (NR>3) {print}}" | head -n -1 '
+  register: repoList
+  changed_when: false
+
+- name: Convert repolist output to Json
+  repolist:
+    repolist: "{{repoList.stdout_lines | to_json}}"
+  register: repoList
+
+- set_fact:
+    repoList: "{{ repoList }}"

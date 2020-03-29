@@ -1,0 +1,195 @@
+---
+- name: "Prepare for Ansible Migration Factory installation"
+  hosts: "tower"
+  vars_files:
+    - "vars/defaults.yml"
+    - "vars/required.yml"
+  vars_prompt:
+    - name: "tower_pass_input"
+      prompt: "Enter the Ansible Tower admin user's password"
+      private: True
+    - name: "discovery_user_input"
+      prompt: "Enter the service account username to perform discoveries with"
+      private: False
+    - name: "discovery_pass_input"
+      prompt: "Enter the service account password to perform discoveries with"
+      private: True
+  tasks:
+    - name: "Persist Tower User password across plays"
+      set_fact:
+        tower_pass: "{{ tower_pass_input }}"
+        discovery_user: "{{ discovery_user_input }}"
+        discovery_pass: "{{ discovery_pass_input }}"
+      no_log: True
+
+    - name: "Install required playbook roles"
+      command: "ansible-galaxy install -r ./roles/requirements.yml -p ./roles/"
+      become: True
+
+    - name: "Ensure EPEL repository is installed | RHEL7"
+      package:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+        state: "installed"
+      when:
+        - 'ansible_os_family == "RedHat"'
+        - 'ansible_distribution_major_version == "7"'
+      become: True
+
+    - name: "Ensure pip is installed"
+      package:
+        name: "python-pip"
+        state: "latest"
+      when: '(ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or
+            (ansible_distribution == "Fedora")'
+      become: True
+
+    - name: "Ensure ansible-tower-cli libraries are present on Operating System"
+      pip:
+        name: "ansible-tower-cli"
+        umask: "0022"
+        state: "latest"
+      become: True
+
+- name: "Install Ansible Migration Factory to Ansible Tower"
+  hosts: "tower"
+  vars_files:
+    - "vars/defaults.yml"
+    - "vars/required.yml"
+  vars:
+    jt_vars_file: './amf_jt_vars.yml'
+  tasks:
+    - name: "Ensure ansible-tower-cli libraries are present in virtual environmrent"
+      include_role:
+        name: "genie_virtual_environments"
+      vars:
+        tower_venv_pylibs:
+          - "ansible-tower-cli"
+
+    - name: "Create Ansible Migration Factory organization"
+      tower_organization:
+        name: "{{ tower_org }}"
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+      register: organization_info
+
+    - name: "Create Ansible Migration Factory project credential"
+      tower_credential:
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        organization: "{{ tower_org }}"
+        name: "{{ amf_cred_scm_name }}"
+        username: "{{ amf_cred_scm_deploy_user }}"
+        password: "{{ amf_cred_scm_deploy_token | default(omit) }}"
+        description: "{{ amf_cred_scm_desc | default(omit) }}"
+        ssh_key_data: "{{ amf_cred_scm_ssh_key_data | default(omit) }}"
+        ssh_key_unlock: "{{ amf_cred_scm_ssh_key_pass | default(omit) }}"
+        kind: "scm"
+        state: "present"
+
+    - name: "Create Ansible Migration Factory project in Ansible Tower"
+      include_role:
+        name: "genie_projects"
+      vars:
+        tower_proj_name: "{{ amf_scm_name }}"
+        tower_proj_desc: "{{ amf_scm_desc }}"
+        tower_proj_url: "{{ amf_scm_url }}"
+        tower_proj_credential: "{{ amf_cred_scm_name }}"
+        tower_proj_branch: "master"
+        tower_proj_type: "git"
+        tower_proj_clean: True
+        tower_proj_update_on_launch: True
+
+    - name: "See if inventory already exists"
+      uri:
+        url: "{{ tower_url }}/api/v2/inventories/?name={{ amf_jt_disc_inv | urlencode }}&organization={{ organization_info.id | urlencode }}"
+        user: "{{ tower_user }}"
+        password: "{{ tower_pass }}"
+        force_basic_auth: True
+        method: "GET"
+        validate_certs: "{{ tower_verify_ssl }}"
+      register: "tower_inventory_check"
+      changed_when: False
+
+    - name: "Create Ansible Migration Factory inventory in Ansible Tower"
+      tower_inventory:
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        description: "{{ amf_jt_disc_inv_desc }}"
+        kind: ""
+        name: "{{ amf_jt_disc_inv }}"
+        organization: "{{ tower_org }}"
+        state: "present"
+      when: tower_inventory_check.json.count == 0
+
+    - name: "Create Ansible Tower credential for discovery to talk back to Tower"
+      tower_credential:
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        name: "{{ amf_cred_cust_name }}"
+        description: "{{ amf_cred_tower_desc }}"
+        organization: "{{ tower_org }}"
+        kind: "tower"
+        host: "{{ tower_url }}"
+        username: "{{ tower_user }}"
+        password: "{{ tower_pass }}"
+
+    - name: "Create machine credential for Discovery playbook"
+      tower_credential:
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        organization: "{{ tower_org }}"
+        name: "{{ amf_cred_discovery_name }}"
+        username: "{{ discovery_user }}"
+        password: "{{ discovery_pass | default('ASK') }}"
+        description: "{{ amf_cred_discovery_desc | default(omit) }}"
+        ssh_key_data: "{{ tower_cred_ssh_key_path | default(omit) }}"
+        ssh_key_unlock: "{{ tower_cred_ssh_key_pass | default(omit) }}"
+        kind: "ssh"
+        state: "present"
+
+    - name: "Create temp file for variables"
+      copy: 
+        content: |
+          ---
+          tower_org: "{{ tower_org }}"
+        dest: "{{ jt_vars_file }}"
+      run_once: True
+      delegate_to: localhost
+
+    # # Attaches the machine and custom Tower credential to the template
+    # ## Attach Demo Inventory by default unless otherwise specified
+    - name: "Create Ansible Migration Factory Discovery job template in Ansible Tower"
+      tower_job_template:
+        tower_host: "{{ tower_url }}"
+        validate_certs: "{{ tower_verify_ssl }}"
+        tower_username: "{{ tower_user }}"
+        tower_password: "{{ tower_pass }}"
+        name: "{{ amf_jt_disc_name }}"
+        job_type: "run"
+        inventory: "{{ amf_jt_disc_inv }}"
+        description: "{{ amf_jt_disc_desc }}"
+        project: "{{ amf_jt_disc_proj }}"
+        playbook: "{{ amf_jt_disc_play }}"
+        credential: "{{ amf_cred_discovery_name }}"
+        forks: "{{ amf_jt_forks }}"
+        concurrent_jobs_enabled: True
+        become_enabled: True
+        extra_vars_path: "{{ jt_vars_file }}"
+
+    - name: "Remove tmep file"
+      file:
+        path: "{{ jt_vars_file }}"
+        state: absent
+
+    - name: "Associate custom credential with Discovery job template"
+      command: "tower-cli job_template associate_credential --job-template '{{ amf_jt_disc_name }}' --credential '{{ amf_cred_cust_name }}' {% if not tower_verify_ssl | bool %}--insecure{% endif %} -u {{ tower_user }} -p {{ tower_pass }} -h {{ tower_url }}"

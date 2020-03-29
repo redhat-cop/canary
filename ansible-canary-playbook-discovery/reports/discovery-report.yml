@@ -1,0 +1,157 @@
+---
+- name: "Generate Discovery Report"
+  hosts: "localhost"
+  gather_facts: False
+  connection: "local"
+  vars_files:
+    - "vars/report.yml"
+  tasks:
+    - name: "Validate discovered_facts prior to Report Generation"
+      include_tasks: "tasks/vars_check.yml"
+      with_items: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: "host"
+      when: "not rpt_skip_validator | bool"
+
+    - name: "Generate Report"
+      block:
+        - name: "Ensure markdown converter is installed"
+          package:
+            name: "pandoc"
+            state: "installed"
+
+        - name: "Ensure CSS is available"
+          copy:
+            src: "discovery_report.css"
+            dest: "{{ rpt_base_path }}/discovery_report.css"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+
+        - name: "Ensure directories are created"
+          file:
+            path: "{{ rpt_base_path }}/{{ item }}"
+            state: "directory"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+          with_items:
+            - "hosts"
+            - "img"
+
+        - name: "Ensure report images are in place"
+          copy:
+            src: "{{ item }}"
+            dest: "{{ rpt_base_path }}/img/{{ item }}"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+          with_items: "{{ rpt_images }}"
+
+        - name: "Create Markdown report | top-level"
+          template:
+            src: "discovery_report.md.j2"
+            dest: "{{ rpt_base_path }}/discovery_report.md"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+
+        - name: "Create Markdown report | server-details"
+          template:
+            src: "server_details.md.j2"
+            dest: "{{ rpt_base_path }}/hosts/{{ host | lower }}.md"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+          with_items: "{{ groups['all'] }}"
+          when: "host != 'localhost'"
+          loop_control:
+            loop_var: "host"
+            label: "{{ rpt_base_path }}/hosts/{{ host | lower }}.md"
+          ignore_errors: True
+
+        - name: "Convert report to html | top-level"
+          command: "pandoc --toc --toc-depth=6 -f markdown -t html -s -c 'discovery_report.css' -o 'index.html' 'discovery_report.md' -M title:'Discovery Report{%if rpt_customer != '' %} - Prepared for {{ rpt_customer }}{% endif %}'"
+          args:
+            chdir: "{{ rpt_base_path }}"
+
+        - name: "Convert report to html | server-details"
+          command: "pandoc --toc --toc-depth=6 -f markdown -t html -s -c '../discovery_report.css' -o '{{ host | lower }}.html' {{ host | lower }}.md -M title:'Server Details - {{ host | lower }}'"
+          args:
+            chdir: "{{ rpt_base_path }}/hosts"
+          with_items: "{{ groups['all'] }}"
+          loop_control:
+            loop_var: "host"
+            label: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+          when: "host != 'localhost'"
+          ignore_errors: True
+
+        - name: "Ensure proper report permissions | top-level"
+          file:
+            path: "{{ rpt_base_path }}/index.html"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+            state: "file"
+          ignore_errors: True
+
+        - name: "Ensure proper report permissions | server-details"
+          file:
+            path: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+            owner: "{{ rpt_owner }}"
+            group: "{{ rpt_group }}"
+            mode: "{{ rpt_mode }}"
+            state: "file"
+          with_items: "{{ groups['all'] }}"
+          loop_control:
+            loop_var: "host"
+            label: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+          when: "host != 'localhost'"
+          ignore_errors: True
+
+        - name: "Inject header image to index.html"
+          lineinfile:
+            path: "{{ rpt_base_path }}/index.html"
+            insertafter: "^<body>"
+            line: '<img src="img/logo1.png" class="head">'
+            regexp: '<img src="img/logo1.png" class="head">'
+            state: "present"
+          ignore_errors: True
+
+        - name: "Inject footer image to index.html"
+          lineinfile:
+            path: "{{ rpt_base_path }}/index.html"
+            insertbefore: "^</body>"
+            line: '<img src="img/logo1" class="foot">'
+            regexp: '<img src="img/logo1.png" class="foot">'
+            state: "present"
+          ignore_errors: True
+
+        - name: "Inject header image for server-details"
+          lineinfile:
+            path: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+            insertafter: "^<body>"
+            line: '<img src="../img/logo2.png" class="details-head">'
+            regexp: '<img src="../img/logo2.png" class="details-head">'
+            state: "present"
+          with_items: "{{ groups['all'] }}"
+          loop_control:
+            loop_var: "host"
+            label: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+          when: "host != 'localhost'"
+          ignore_errors: True
+
+        - name: "Inject footer image for server-details"
+          lineinfile:
+            path: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+            insertbefore: "^</body>"
+            line: '<img src="../img/logo2.png" class="foot">'
+            regexp: '<img src="../img/logo2.png" class="foot">'
+            state: "present"
+          with_items: "{{ groups['all'] }}"
+          loop_control:
+            loop_var: "host"
+            label: "{{ rpt_base_path }}/hosts/{{ host | lower }}.html"
+          when: "host != 'localhost'"
+          ignore_errors: True
+      delegate_to: "{{ discovery_report_server }}"

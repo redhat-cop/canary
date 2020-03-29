@@ -1,0 +1,25 @@
+---
+- name: "Identify application as {{ amf_as_discovered_app.name }}"
+  application_id:
+    application: "{{ amf_as_discovered_app }}"
+    facts: "{{ fact_subset }}"
+    users: "{{ amf_as_user_group.users }}"
+    groups: "{{ amf_as_user_group.groups }}"
+    paths: "{{ amf_as_paths }}"
+    packages: "{{ amf_as_packages }}"
+    ports: "{{ amf_as_ports }}"
+    processes: "{{ amf_as_processes }}"
+    services: "{{ amf_as_services }}"
+    scores: "{{ amf_as_scores }}"
+    discovered_apps: "{{ ansible_facts.discovered_apps | default([]) }}"
+  register: "application_id_out"
+
+- name: "Debug application_id_out counters for verification"
+  debug:
+    var: "application_id_out"
+    verbosity: "1"
+
+- name: "Debug discovered applications"
+  debug:
+    var: "discovered_apps"
+    verbosity: "1"

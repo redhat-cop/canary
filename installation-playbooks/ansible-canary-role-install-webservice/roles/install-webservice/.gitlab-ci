@@ -1,0 +1,6 @@
+test:
+  before_script:
+    - yum install python-pip
+    - pip install molecule ansible docker
+  script:
+    - molecule test

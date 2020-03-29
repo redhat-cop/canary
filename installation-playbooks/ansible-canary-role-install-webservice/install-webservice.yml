@@ -1,0 +1,6 @@
+---
+- hosts: "all"
+  tasks:
+    - name: "Install Coalmine"
+      include_role:
+        name: "install-webservice"

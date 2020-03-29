@@ -1,0 +1,14 @@
+---
+rpt_owner: "nginx"
+rpt_group: "nginx"
+rpt_mode: "0755"
+rpt_base_path: "/var/www/html"
+rpt_customer: "" # who the report is prepared for
+# The following skips the variable/fact validator functionality of the discovery report
+rpt_skip_validator: True
+# Set this on your report job templates and make sure you have ssh keys setup to access the report server
+## If targeting an isolated instance group you should have a key set from the isolated instances to the report server
+discovery_report_server: ""
+rpt_images:
+  - "RH_Consulting_header_2700x750_grey.png"
+  - "RedHat-Header.png"

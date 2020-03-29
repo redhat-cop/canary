@@ -1,0 +1,53 @@
+@mixin side-panel-component-theme($snoopy-app-theme) {
+  $primary: map-get($snoopy-app-theme, primary);
+  $warn: map-get($snoopy-app-theme, warn);
+  $background: map-get($snoopy-app-theme, background);
+  $foreground: map-get($snoopy-app-theme, foreground);
+
+  app-side-panel {
+    a {
+      width: 100%;
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      border-bottom-color: rgba(211, 211, 211, .2);
+      padding: 0px 24px; 
+      
+      color: mat-color($background, text);
+      text-transform: uppercase;
+      font-size: 15px;
+      font-weight: 400;
+    }
+  }
+
+  .mat-expansion-panel {
+    background: mat-color($background, background);
+    
+    .mat-expansion-panel-header-title {
+      color: mat-color($background, text);
+      text-transform: uppercase;
+    }
+    .mat-expansion-indicator::after {
+      color: mat-color($background, text);
+    }
+
+
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      margin: auto;
+    }
+    li :hover {
+      background: mat-color($background, hover2);      
+    }
+    a {
+      text-transform: none;
+      padding: 0px 14px;       
+    }
+    a:active, a:hover {
+  /* // Applies to activated links  */
+      color: mat-color($background, selected-button);
+    }
+  }
+}

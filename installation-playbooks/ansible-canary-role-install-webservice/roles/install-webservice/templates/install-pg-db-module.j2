@@ -1,0 +1,11 @@
+embed-server --std-out=echo --server-config=standalone.xml
+
+batch
+
+module add --name=org.postgres --resources={{ ws_user_home }}/{{ postgres_jdbc_driver }} --dependencies=javax.api,javax.transaction.api
+
+/subsystem=datasources/jdbc-driver=postgres:add(driver-name="postgres",driver-module-name="org.postgres",driver-class-name=org.postgresql.Driver)
+
+/subsystem=datasources/data-source=canaryDataSource/:add(connection-url=jdbc:postgresql://127.0.0.1:5432/{{ ws_db_name }},driver-name=postgres,jndi-name=java:jboss/datasources/PostgresDS,initial-pool-size=4,max-pool-size=64,min-pool-size=4,password={{ ws_db_pwd }},user-name={{ ws_db_user }})
+
+run-batch

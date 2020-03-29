@@ -1,0 +1,58 @@
+---
+- name: "Initialize signature scoring"
+  set_fact:
+    amf_as_svc_count: "0"
+    amf_as_usr_count: "0"
+    amf_as_grp_count: "0"
+    amf_as_path_count: "0"
+    amf_as_proc_count: "0"
+    amf_as_pkg_count: "0"
+
+- name: "Check for {{ amf_as_discovered_app.name }} services"
+  set_fact:
+    amf_as_svc_count: "{{ amf_as_svc_count | int + 1 }}"
+  with_items: "{{ amf_as_services }}"
+  when:
+    - "ansible_facts['services'][service] is defined"
+  loop_control:
+    loop_var: "service"
+
+- name: "Check if {{ amf_as_discovered_app.name }} user(s) exist"
+  set_fact:
+    amf_as_usr_count: "{{ amf_as_usr_count | int + 1 }}"
+  with_items: "{{ amf_as_user_group.users }}"
+  when:
+    - 'item in ansible_facts | json_query("local_users[*].user")'
+
+- name: "Check if {{ amf_as_discovered_app.name }} group(s) exist"
+  set_fact:
+    amf_as_grp_count: "{{ amf_as_grp_count | int + 1 }}"
+  with_items: "{{ amf_as_user_group.groups }}"
+  when:
+    - 'item in ansible_facts | json_query("local_groups[*].group")'
+
+- name: "Check if {{ amf_as_discovered_app.name }} application path(s) exist"
+  include_tasks: "check_paths.yml"
+  with_items: "{{ amf_as_paths }}"
+  loop_control:
+    loop_var: "path"
+
+- name: "Check for {{ amf_as_discovered_app.name }} packages"
+  set_fact:
+    amf_as_pkg_count: "{{ amf_as_pkg_count | int + 1 }}"
+  with_items: "{{ amf_as_packages }}"
+  when: "ansible_facts['packages'][package] is defined"
+  loop_control:
+    loop_var: "package"
+
+# Only thing we may want to add is a check for running processes
+- name: "Identify application as {{ amf_as_discovered_app.name }}"
+  set_fact:
+    discovered_apps: "{{ discovered_apps | union([amf_as_discovered_app]) }}"
+  when:
+    - 'amf_as_svc_count | int >= 3'
+    - 'amf_as_usr_count | int >= 1'
+    - 'amf_as_grp_count | int >= 1'
+    - 'amf_as_path_count | int == 1'
+    - 'amf_as_pkg_count | int >= 4'
+#    - 'amf_as_proc_count | int > 0'

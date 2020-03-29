@@ -1,0 +1,16 @@
+---
+#tasks for finding getting data into Json from netstat
+
+
+- name: PS Aux output
+  shell: "ps aux | awk '{if (NR!=1) {print}}'"
+  register: ps_aux
+  changed_when: false
+
+- name: Convert ps_aux output to Json
+  processes:
+    processes: "{{ps_aux.stdout_lines | to_json}}"
+  register: result
+
+- set_fact:
+    processes: "{{ result }}"

@@ -1,0 +1,41 @@
+{
+"hostname" : "lxrsv8",
+   "ansible_processes": [
+                    {
+                        "TTY": "?",
+                        "CPU_Perc": "0.0",
+                        "PID": "1",
+                        "MEM_Perc": "0.0",
+                        "COMMAND": " init [3]",
+                        "USER": "root",
+                        "STAT": "Ss"
+                    },
+                    {
+                        "TTY": "?",
+                        "CPU_Perc": "0.0",
+                        "PID": "2",
+                        "MEM_Perc": "0.0",
+                        "COMMAND": " [migration/0]",
+                        "USER": "root",
+                        "STAT": "S<"
+                    },
+                    {
+                        "TTY": "?",
+                        "CPU_Perc": "0.0",
+                        "PID": "3",
+                        "MEM_Perc": "0.0",
+                        "COMMAND": " [ksoftirqd/0]",
+                        "USER": "root",
+                        "STAT": "SN"
+                    },
+                    {
+                        "TTY": "?",
+                        "CPU_Perc": "0.0",
+                        "PID": "4",
+                        "MEM_Perc": "0.0",
+                        "COMMAND": " [events/0]",
+                        "USER": "root",
+                        "STAT": "S<"
+                    }
+	]
+}

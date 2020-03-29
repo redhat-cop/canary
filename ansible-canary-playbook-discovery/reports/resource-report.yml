@@ -1,0 +1,16 @@
+---
+- name: "Ansible Migration Factory - Report"
+  hosts: "localhost"
+  gather_facts: False
+  connection: "local"
+  vars_files:
+    - "vars/report.yml"
+  tasks:
+    - name: "Create report"
+      template:
+        src: "resource_report.csv.j2"
+        dest: "{{ rpt_base_path }}/resource_report.csv"
+        owner: "{{ rpt_owner }}"
+        group: "{{ rpt_group }}"
+        mode: "{{ rpt_mode }}"
+      delegate_to: "{{ discovery_report_server }}"

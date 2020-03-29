@@ -1,0 +1,33 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users:
+    - "mqm"
+  groups:
+    - "mqm"
+
+amf_as_paths:
+  - "/usr/mqm"
+
+amf_as_packages:
+  - "mqm.server.rte"
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "amqzxma0"
+
+amf_as_scores:
+  users: "1"
+  groups: "1"
+  services: "0"
+  paths: "1"
+  packages: "1"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "IBM WebSphere MQ server"
+  desc: "Hosts identified as IBM WebSphere MQ Servers"

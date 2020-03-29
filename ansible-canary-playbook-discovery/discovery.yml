@@ -1,0 +1,150 @@
+---
+# Original awx project scan facts playbook and Ansible modules can be found:
+#   https://github.com/ansible/awx-facts-playbooks
+
+- name: "Ansible Migration Factory - Discovery"
+  hosts: "all"
+  gather_facts: False
+  # strategy: "free"
+  vars:
+    failed_roles: []
+  vars_files:
+    - "vars/discovery_vars.yml"
+  pre_tasks:
+    # ignore facter facts
+    - name: "Gather facts"
+      setup:
+        gather_subset: "!all,hardware,network,virtual"
+        fact_path: "/tmp" #avoid grabbing ansible_local by fakeout
+
+    - debug:
+        var: "ansible_facts"
+        verbosity: "1"
+  tasks:
+    - name: "Unix/Linux"
+      block:
+        - name: "Get list of discovery roles installed"
+          block:
+            - name: "Get present project playbook directory"
+              command: "pwd"
+              register: "pwd_result"
+              changed_when: False
+
+            - name: "Get list of Disovery Roles"
+              find:
+                recurse: False
+                paths:
+                  - "{{ pwd_result.stdout }}/roles"
+                patterns: "^amf-discovery-.*$"
+                file_type: "directory"
+                use_regex: True
+              register: "discovery_roles_found"
+
+            - name: "Get list of Disovery Application Signature Roles"
+              find:
+                recurse: False
+                paths:
+                  - "{{ pwd_result.stdout }}/roles"
+                patterns: "^amf-application-signature-.*$"
+                file_type: "directory"
+                use_regex: True
+              register: "app_sig_roles_found"
+
+            - debug:
+                var: "discovery_roles_found"
+                verbosity: "1"
+
+            - debug:
+                var: "app_sig_roles_found"
+                verbosity: "1"
+
+            - name: "Set list of discovery and application signature roles found"
+              set_fact:
+                discovery_roles: "{{ discovery_roles_found | json_query('files[*].path') }}"
+                application_signature_roles: "{{ app_sig_roles_found | json_query('files[*].path') }}"
+          delegate_to: "localhost"
+          become: False
+          connection: "local"
+
+        - name: "Scan packages | Unix/Linux"
+          scan_packages:
+            os_family: "{{ ansible_os_family }}"
+
+        - name: "Scan services | Unix/Linux"
+          scan_services:
+
+        # Plugable discovery role interface
+        - name: "Run Discovery Roles"
+          include_role:
+            name: "amf-internals-role-runner"
+          with_items: "{{ discovery_roles }}"
+          loop_control:
+            loop_var: "role"
+          when: 'discovery_roles | length > 0'
+          vars:
+            role_to_run: "{{ role | basename }}"
+
+        - name: "Debug all facts"
+          debug:
+            var: "ansible_facts"
+            verbosity: "1"
+
+        - name: "Set Legacy Groups"
+          set_fact:
+            legacy_groups: "{{ group_names }}"
+            cacheable: True
+
+        # TODO:
+        # Based on what OS, take the baseline list for each fact type
+        #   Use 'unique' jinja filter to get unique entries compared to a
+        #   default OS install
+        #   This helps ID running applications by getting only a difference
+        - name: "Set pared down facts for application identification"
+          set_fact:
+            fact_subset:
+              services: "{{ ansible_facts.services | default({}) }}"
+              running_processes: "{{ ansible_facts.running_processes | default({}) }}"
+              packages: "{{ ansible_facts.packages | default({}) }}"
+              tcp_listeners: "{{ ansible_facts.tcp_listeners | default([]) }}"
+              udp_listeners: "{{ ansible_facts.udp_listeners | default([]) }}"
+              local_users: "{{ ansible_facts.local_users | default([]) }}"
+              local_groups: "{{ ansible_facts.local_groups | default([]) }}"
+
+        # Plugable application signature interface
+        - name: "Run Application Roles"
+          include_role:
+            name: "amf-internals-role-runner"
+          with_items: "{{ application_signature_roles }}"
+          loop_control:
+            loop_var: "application_signature"
+          when: 'application_signature_roles | length > 0'
+          vars:
+            role_to_run: "{{ application_signature | basename }}"
+
+        - name: "Debug discovered_apps value | post application signatures"
+          debug:
+            var: "discovered_apps"
+            verbosity: "1"
+
+        - name: "Build discovered host inventory | Unix/Linux"
+          include_role:
+            name: "amf-discovered-host-inventory"
+
+      always:
+        - name: "Display failed roles"
+          debug:
+            msg: "{{ failed_roles }}"
+          when: failed_roles | length > 0
+
+      when: 'ansible_os_family != "Windows"'
+      become: True
+
+    # - name: "Seed Coalmine web-service"
+    #   include_role:
+    #     name: "amf-seed-coalmine"
+    #
+    # - name: "Push data to Coalmine"
+    #   include_role:
+    #     name: "amf-push-coalmine-data"
+        # apply:
+        #   delegate_to: "localhost"

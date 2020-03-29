@@ -1,0 +1,61 @@
+## Discovered Application Types
+{# to get total apps we subtract 2 from the total to account for built-in "all" and "ungrouped" #}
+{# we also have to account for legacy_groups #}
+{% set not_apps = legacy_groups | default([]) | length | int + 2 %}
+**Total Number of Discovered Applications**: {{ groups | dict2items | length() | int - not_apps | int }}
+
+| Application Name | Number of Associated Servers |
+| --- | --- |
+{% for app in groups | dict2items | sort(attribute='key') %}
+{% if app.key != 'all' and app.key != 'ungrouped' and app.key not in legacy_groups | default([]) %}
+{# we do the regex_replace stuff to fix any groups that get transformed due to invalid group names #}
+| [{{ app.key | regex_replace('_', ' ') }}](#{{ app.key | regex_replace('_', ' ') | regex_replace('\s', '-') | lower() }}) | {{ app.value | length() | int }} |
+{% endif %}
+{% endfor %}
+
+## Servers By Application Type
+{% for app in groups | dict2items | sort(attribute='key') %}
+{% if app.key != 'all' and app.key != 'ungrouped' and app.key not in legacy_groups | default([]) and app.value | length | int > 0 %}
+### {{ app.key | regex_replace('_', ' ') }}
+
+There {% if app.value | length | int > 1 %}were **{{ app.value | length }} servers**{% else %}was **1 server**{% endif %} found to be running **{{ app.key | regex_replace('_', ' ') }}**:
+
+| Hostname | FQDN | IPv4 Address |
+| --- | --- | --- |
+{% for host in app.value | sort %}
+| [{{ host | lower() }}](hosts/{{ host | lower }}.html) | {{ hostvars[host]['discovered_facts']['fqdn'] }} | {{ hostvars[host]['discovered_facts']['default_ipv4']['address'] }} |
+{% endfor %}
+
+
+{% endif %}
+{% endfor %}
+
+
+{% if report_legacy_groups | default([]) | length | int > 0 and legacy_groups | default([]) | length | int > 0 %}
+## Servers By Environment
+{% for g in report_legacy_groups | default([]) %}
+### {{ g | regex_replace('_', ' ') }}
+| Hostname | FQDN | IPv4 Address |
+| --- | --- | --- |
+{% for host in groups[g] | sort %}
+| [{{ host | lower() }}](hosts/{{ host | lower }}.html) | {{ hostvars[host]['discovered_facts']['fqdn'] }} | {{ hostvars[host]['discovered_facts']['default_ipv4']['address'] }} |
+{% endfor %}
+
+
+{% endfor %}
+{% endif %}
+
+
+## All Discovered Servers
+{# following line does -1 to account for localhost target #}
+Total number of servers Discovered: **{{ groups['all'] | length | int - 1 }}**
+
+Click on a server's hostname for server configuration details:
+
+| Hostname | FQDN | IPv4 Address |
+| --- | --- | --- |
+{% for host in groups['all'] | sort() %}
+{% if host != 'localhost' %}
+| [{{ host | lower() }}](hosts/{{ host | lower }}.html) | {{ hostvars[host]['discovered_facts']['fqdn'] | lower() }} | {{ hostvars[host]['discovered_facts']['default_ipv4']['address'] }} |
+{% endif %}
+{% endfor %}

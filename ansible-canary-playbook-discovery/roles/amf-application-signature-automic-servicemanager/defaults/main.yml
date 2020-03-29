@@ -1,0 +1,32 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/uc4"
+  - "/etc/rc.uc4"
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "ucybsmgr"
+  - "ucxjap6"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "2"
+  packages: "0"
+  ports: "0"
+  processes: "2"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Automic ServiceManager"
+  desc: "Hosts identified as Automic ServiceManager Servers"

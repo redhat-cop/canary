@@ -1,0 +1,5 @@
+---
+- name: "Get local user and local group facts"
+  scan_user_group:
+
+# usergroupparser returns ansible_facts[local_users] and ansible_facts[local_groups] json

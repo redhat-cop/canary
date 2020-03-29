@@ -1,0 +1,6 @@
+---
+tower_venv_pylibs:
+  - "ansible-tower-cli"
+  - "jmespath"
+tower_venv_umask: "0022"
+tower_venv_path: "/var/lib/awx/venv/ansible"

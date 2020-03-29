@@ -1,0 +1,32 @@
+---
+- hosts: all
+#  become: yes
+
+  pre_tasks:
+    - include_vars:
+        file: tower_credentials.yml
+
+  roles:
+    - { role: listener_role }
+    - { role: processes_role }
+    - { role: repolist_role }
+    - { role: cron_role }
+    - { role: localuser_localgroup }
+
+  post_tasks:
+    - name: set custom facts
+      set_fact:
+        custom_facts_formatted:
+          - "{{ listeners }}"
+          - "{{ processes }}"
+          - "{{ cron_jobs }}"
+          - "{{ repoList }}"
+          - "{{ local_users_groups }}"
+    - debug: var=custom_facts_formatted
+
+
+    - name: configure and push data to webservice
+      include_role:
+        name: push_facts_role
+      delegate_to: 127.0.0.1
+

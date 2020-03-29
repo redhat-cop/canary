@@ -1,0 +1,98 @@
+<mat-card class="page">
+  <mat-card-header>
+    <mat-card-title>Local Users & Groups</mat-card-title>
+  </mat-card-header>
+<div class='hostname-field'>
+  <mat-form-field>
+    <input matTooltip="Enter a hostname to poll database" matTooltipPosition="right" type="text" placeholder="Hostname" aria-label="?" matInput [formControl]="control" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option (onSelectionChange)="onSubmitHostname($event)" *ngFor="let hostname of filteredOptions | async" [value]="hostname">
+        {{ hostname }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field class="filter">
+    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+    </mat-form-field>
+  </div>
+  <mat-card-header>
+    <mat-card-title>Local Users</mat-card-title>
+  </mat-card-header>
+  <mat-table #table [dataSource]="dataSourceUsers">
+    <ng-container matColumnDef="username">
+      <mat-header-cell *matHeaderCellDef> Username </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.username}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="shadow_must_change">
+      <mat-header-cell *matHeaderCellDef> Shadow Must Change </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.shadow_must_change}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="encrypted_password">
+      <mat-header-cell *matHeaderCellDef> Encrypted Password </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.encrypted_password}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="login_shell">
+      <mat-header-cell *matHeaderCellDef> Login Shell </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.login_shell}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="home_directory">
+      <mat-header-cell *matHeaderCellDef> Home Directory </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.home_directory}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="uid">
+      <mat-header-cell *matHeaderCellDef> UID </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.uid}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="gid">
+      <mat-header-cell *matHeaderCellDef> GID </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.gid}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="usersTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: usersTableColumns;"></mat-row>
+  </mat-table>
+  <mat-paginator #paginatorUser [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+  </mat-paginator>
+</mat-card>
+<!-- USERS ABOVE      GROUPS BELOW -->
+<mat-card>
+
+  <mat-card-header>
+    <mat-card-title>Local Groups</mat-card-title>
+  </mat-card-header>
+  <mat-table #table [dataSource]="dataSourceGroups">
+    <ng-container matColumnDef="gid">
+      <mat-header-cell *matHeaderCellDef> GID </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.gid}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="password">
+      <mat-header-cell *matHeaderCellDef> Password </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.password}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="group_list">
+      <mat-header-cell *matHeaderCellDef> Group List </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.group_list}} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="group_name">
+      <mat-header-cell *matHeaderCellDef> Group Name </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{data.group_name}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="groupsTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let data; columns: groupsTableColumns;"></mat-row>
+  </mat-table>
+  <mat-card-footer>
+    <mat-paginator #paginatorGroup [pageSize]="10" [pageSizeOptions]="[10, 20, 30]">
+    </mat-paginator>
+  </mat-card-footer>
+  <mat-progress-spinner mode="indeterminate" *ngIf="loaded"></mat-progress-spinner>
+</mat-card>

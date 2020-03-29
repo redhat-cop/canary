@@ -1,0 +1,86 @@
+// Color palettes from the Material Design spec.
+// See https://www.google.com/design/spec/style/color.html
+//
+// Contrast colors are hard-coded because it is too difficult (probably impossible) to
+// calculate them. These contrast colors are pulled from the public Material Design spec swatches.
+// While the contrast colors in the spec are not prescriptive, we use them for convenience.
+
+$white-95-opacity: rgba(white, 0.95);
+$black-87-opacity: rgba(black, 0.87);
+$white-87-opacity: rgba(white, 0.87);
+$black-12-opacity: rgba(black, 0.12);
+$white-12-opacity: rgba(white, 0.12);
+$black-6-opacity: rgba(black, 0.06);
+$white-6-opacity: rgba(white, 0.06);
+$black-6-opacity: rgba(black, 0.06);
+
+$mat-grey-black: (
+  50: #fafafa,
+  100: #f5f5f5,
+  200: #eeeeee,
+  300: #e0e0e0,
+  400: #bdbdbd,
+  500: #212121,
+  600: #757575,
+  700: #616161,
+  800: #424242,
+  900: #212121,
+  A100: #ffffff,
+  A200: #eeeeee,
+  A400: #bdbdbd,
+  A700: #616161,
+  contrast: (
+    50: $black-87-opacity,
+    100: $black-87-opacity,
+    200: $black-87-opacity,
+    300: $black-87-opacity,
+    400: $black-87-opacity,
+    500: $white-95-opacity, //title bar text
+    600: $white-87-opacity,
+    700: $white-87-opacity,
+    800: $white-87-opacity,
+    900: $white-87-opacity,
+    A100: $black-87-opacity,
+    A200: $black-87-opacity,
+    A400: $black-87-opacity,
+    A700: $white-87-opacity,
+  )
+);
+
+// Background palette for light themes.
+$mat-light-theme-background: (
+  status-bar:                 map_get($mat-grey-black, 300),
+  app-bar:                    map_get($mat-grey-black, 900),
+  background:                 map_get($mat-grey-black, 900),  
+  hover:                      rgba(black, 0.04), // TODO(kara): check style with Material Design UX
+  hover2:                     rgba(white, 0.04), 
+  card:                       map_get($mat-grey-black, 50), //MIGRATION DATA & mat-card
+  dialog:                     map_get($mat-grey-black, 900), //SIDENAV
+  text:                       map_get($mat-grey-black, 50),
+  disabled-button:            $black-12-opacity,
+  raised-button:              white,
+  focused-button:             map_get($mat-blue, 300),  
+  selected-button:            map_get($mat-blue, 300),
+  selected-disabled-button:   map_get($mat-blue, 400),
+  disabled-button-toggle:     map_get($mat-blue, 200),
+  unselected-chip:            map_get($mat-grey-black, 300),
+  disabled-list-option:       map_get($mat-grey-black, 200),
+);
+
+// Foreground palette for light theme.
+$mat-light-theme-foreground: (
+  base:              black, //click on hostname //set
+  divider:           $black-12-opacity, //set
+  dividers:          $black-12-opacity, 
+  disabled:          rgba(black, 0.38), //pagination arrows //set
+  disabled-button:   rgba(black, 0.38),
+  disabled-text:     rgba(black, 0.38),
+  hint-text:         rgba(black, 0.38),
+  secondary-text:    rgba(black, 0.54), //card text //set
+  icon:              rgba(black, 0.54),
+  icons:             rgba(black, 0.54),
+  text:              rgba(black, 0.87), //set //MIGRATION DATA & pagination #
+  slider-min:        rgba(black, 0.87),
+  slider-off:        rgba(black, 0.26),
+  slider-off-active: rgba(black, 0.38),
+);

@@ -1,0 +1,83 @@
+---
+- name: Get Basic Auth token
+  uri:
+    url: "https://localhost/api/v1/authtoken/"
+    method: POST
+    force_basic_auth: no
+    body: {"username":"{{ tower_user }}","password":"{{ tower_password }}"}
+    body_format: json
+    validate_certs: no
+    return_content: yes
+  register: token
+
+- debug:
+    var: token
+
+- name: Get Hostname ID from Ansible Tower
+  uri:
+    url: "https://localhost/api/v1/hosts/?name={{ inventory_hostname }}"
+    method: GET
+    force_basic_auth: no
+    body_format: json
+    headers:
+      Authorization: 'Token {{token.json.token}}'
+    validate_certs: no
+    timeout: 60
+  register: json_data
+
+- set_fact:
+    hostname_id: "{{json_data.json.results[0].id}}"
+- debug: var=hostname_id
+
+- name: get Tower fact_versions
+  uri:
+    url: "https://localhost/api/v1/hosts/{{ hostname_id }}/fact_versions/"
+    method: GET
+    force_basic_auth: no
+    headers:
+      Authorization: 'Token {{token.json.token}}'
+    body_format: json
+    validate_certs: no
+  register: json_data
+
+- set_fact:
+    fact_views: "{{ json_data.json.results | map (attribute='related.fact_view')| list }}"
+
+- name: call fact_views ansible facts from tower api
+  uri:
+    url: "https://localhost/{{ item }}"
+    method: GET
+    force_basic_auth: yes
+    user: "{{ tower_user }}"
+    password: "{{ tower_password }}"
+    body_format: json
+    validate_certs: no
+  with_items:
+    - "{{ fact_views[0] }}"
+    - "{{ fact_views[1] }}"
+    - "{{ fact_views[2] }}"
+  register: data
+
+- set_fact:
+    ansible_data: "{{ data.results | map(attribute='json.facts') | list }}"
+
+- convertWebService:
+    ansible_facts: '{{ ansible_data }}'
+    parent_app_name: '{{ parent_app_name | mandatory }}'
+    hostname: '{{ inventory_hostname }}'
+    custom_facts_list: '{{ custom_facts_formatted }}'
+  register: result
+
+- debug:
+    var: result.meta
+
+- name: post data to webservice
+  uri:
+    url: "http://{{ webservice_ip }}:80/v1/ansible/web/servers/{{ inventory_hostname | lower }}/insertAnsibleData"
+    method: POST
+    body_format: json
+    body: "{{ result.meta }}"
+    validate_certs: no
+  register: response
+
+- debug: var=response

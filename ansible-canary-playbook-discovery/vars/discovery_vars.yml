@@ -1,0 +1,12 @@
+---
+amf_webservice_host: ""
+# Following 4 options for custom webservice
+ws_db_name: "coalmine"
+pg_user: "postgres"
+pg_group: "postgres"
+pg_home: "/var/opt/rh/rh-postgresql96/lib/pgsql/data"
+proc_stdout: False
+# Set the following to False if you do not want to try and pip install to Tower venv's the prerequisite python libraries for the code to work every time
+discovered_host_install_prereqs: False
+# Set the following to True if you have permission from customer to install packages on the hosts
+discovery_install_prereqs: False

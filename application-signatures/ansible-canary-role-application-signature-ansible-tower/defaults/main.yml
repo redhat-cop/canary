@@ -1,0 +1,30 @@
+---
+# built for Tower 3.4.1-1
+amf_as_services:
+  - "postgresql-9.6.service"
+  - "rabbitmq-server.service"
+  - "nginx.service"
+  - "supervisord.service"
+
+amf_as_user_group:
+  users:
+    - "awx"
+  groups:
+    - "awx"
+
+amf_as_paths:
+  - "/var/lib/awx"
+
+# built for Tower 3.4.1-1
+amf_as_packages:
+  - "rabbitmq-server"
+  - "ansible-tower-server"
+  - "postgresql96-contrib"
+  - "postgresql96-libs"
+  - "supervisor"
+  - "nginx"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Ansible Tower"
+  desc: "Hosts identified as Ansible Tower Servers"

@@ -1,0 +1,3 @@
+[tower]
+# if running a cluster, add the VIP here and remove the following line
+localhost ansible_connection=local

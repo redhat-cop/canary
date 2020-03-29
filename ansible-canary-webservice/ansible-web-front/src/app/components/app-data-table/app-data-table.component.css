@@ -1,0 +1,17 @@
+
+.filter{
+    float: right;
+}
+
+.mat-card-title{
+    font-size: 22px;
+}
+
+.mat-card-header{
+    font-size: 22px;
+}
+
+
+mat-card.page{
+    margin-top: 50px;
+}

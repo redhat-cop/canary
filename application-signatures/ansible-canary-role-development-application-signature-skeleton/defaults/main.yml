@@ -1,0 +1,43 @@
+---
+amf_as_services:
+  - "example1.service"
+  - "example2.service"
+
+amf_as_user_group:
+  users:
+    - "appuser"
+  groups:
+    - "appgroup"
+
+amf_as_paths:
+  - "/path/my/app/always/has"
+
+# not fully implemented yet, will probably need a name and version field
+## currently only takes a package name (no versions)
+amf_as_packages:
+  - "pkg1"
+  - "pkg2"
+  - "pkg3"
+
+# ports not implemented yet
+amf_as_ports:
+  - "1234"
+
+amf_as_processes:
+  - "process_name1"
+  - "process_name2"
+  - "process_name3"
+
+amf_as_scores:
+  users: "1"
+  groups: "1"
+  services: "2"
+  paths: "1"
+  packages: "3"
+  ports: "1"
+  processes: "3"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "My App Name"
+  desc: "Hosts identified as My App Servers"

@@ -1,0 +1,31 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/opt/CA/SystemEDGE"
+  - "/etc/rc.d/CA-SystemEDGE"
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "sysedge"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "2"
+  packages: "0"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "CA SystemEdge Client"
+  desc: "Hosts identified as CA SystemEdge Client Servers"

@@ -1,0 +1,11 @@
+Hostname,IP Address,CPU Count,CPU Cores,CPU Type,RAM Total (MB),Swap Total (MB),Disk Mount Point,Disk Size Total,Disk Size Available,Filesystem Type,Device
+{% for h in groups['all'] %}
+{% if h != 'localhost' %}
+{{ h }}, {{ hostvars[h]['discovered_facts']['default_ipv4']['address'] }},{{ hostvars[h]['discovered_facts']['processor_count'] }},{{ hostvars[h]['discovered_facts']['processor_cores'] }},{{ hostvars[h]['discovered_facts']['processor'] }},{{ hostvars[h]['discovered_facts']['memtotal_mb'] }},{{ hostvars[h]['discovered_facts']['swaptotal_mb'] }},,,,,
+{% for m in hostvars[h]['discovered_facts']['mounts'] %}
+{% if 'proc' not in m['fstype'] and 'nfs' not in m['fstype'] %}
+,,,,,,,{{ m['mount'] | default('') }},{{ m['size_total'] | default('') }},{{ m['size_available'] | default('') }},{{ m['fstype'] | default('') }},{{ m['device'] | default('') }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}

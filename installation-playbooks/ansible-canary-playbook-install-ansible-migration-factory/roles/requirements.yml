@@ -1,0 +1,9 @@
+---
+- src: "https://github.com/redhat-ansible-practice/ansible_tower_genie_virtual_environments"
+  name: "genie_virtual_environments"
+
+- src: "https://github.com/redhat-ansible-practice/ansible_tower_genie_projects"
+  name: "genie_projects"
+
+- src: "https://github.com/redhat-ansible-practice/ansible_tower_genie_job_templates"
+  name: "genie_job_templates"

@@ -1,0 +1,33 @@
+---
+- name: Find the cron dirs
+  find:
+    paths: /etc/cron.hourly,/etc/cron.daily,/etc/cron.weekly,/etc/cron.monthly
+    recurse: yes
+  register: cronFiles
+
+- set_fact:
+    cronFiles: "{{ cronFiles.files | map(attribute='path') | list }}"
+
+- name: Collect /etc/crontab data
+  shell: 'cat /etc/crontab'
+  register: cronTab
+  changed_when: false
+
+- name: Collect /var/spool/cron files
+  find:
+    paths: /var/spool/cron/
+    recurse: yes
+  register: varSpoolCron
+
+- set_fact:
+    varSpoolCron: "{{ varSpoolCron.files | map(attribute='path') | list }}"
+
+- name: parse cron data
+  crontab_tojson:
+    cronfiles: "{{ cronFiles }}"
+    crontab: "{{ cronTab.stdout_lines }}"
+    varSpool: "{{ varSpoolCron }}"
+  register: cronData
+
+- set_fact:
+    cron_jobs: "{{ cronData }}"

@@ -1,0 +1,9 @@
+---
+- hosts: localhost 
+  tasks:
+    name: Get Request - regenerate CSV files
+    uri:
+      url: "http://{{ webservice_ip }}:8080/v1/ansible/web/parent_app/print_facts_csv/{{eai_code}}"
+      method: GET
+      validate_certs: no
+    register: response

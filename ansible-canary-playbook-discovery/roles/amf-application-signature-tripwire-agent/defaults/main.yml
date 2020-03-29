@@ -1,0 +1,39 @@
+---
+amf_as_services:
+  - "tripwire-axon-agent"
+  - "tw-eg-event-source"
+  - "tw-eg-service"
+  - "teges"
+  - "teeg"
+  - "teagent"
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/opt/tripwire/agent"
+  - "/usr/local/tripwire"
+
+amf_as_packages: []
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "twagent"
+  - "tegesd"
+  - "tesvc"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "3"
+  paths: "1"
+  packages: "0"
+  ports: "0"
+  processes: "2"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "Tripwire Agent"
+  desc: "Hosts identified as Tripwire Agent Servers"

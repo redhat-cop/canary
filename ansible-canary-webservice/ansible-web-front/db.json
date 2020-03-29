@@ -1,0 +1,393 @@
+{
+"appcodes":[
+    { "appcode": 9306, "app": "WAS", "id": 1 },
+    { "appcode": 6946, "app": "Clarity", "id": 2 },
+    { "appcode": 7351, "app": "Mongo", "id": 3 }
+    ], 
+    
+"appData": [
+    { "id": 1, "appcode": 9306, "parent_app_name": "SalesUS", "hostname": "lxrs8", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "dev,test", "migration status": true, "destination host" : "acme10"},
+    { "id": 2, "appcode": 9306, "parent_app_name": "SalesUS", "hostname": "lxrs9", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "qa", "migration status": true, "destination host" : "acme11" },
+    { "id": 3, "appcode": 9306, "parent_app_name": "SalesUS", "hostname": "lxrs10", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "prod", "migration status": false, "destination host": "" },
+    { "id": 4, "appcode": 6946, "parent_app_name": "Lim", "hostname": "met7", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "dev,test", "migraiton status": false, "destination host": "" },
+    { "id": 5, "appcode": 6946, "parent_app_name": "Lim", "hostname": "met8", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "qa", "migration status": false, "destination host": "" },
+    { "id": 5, "appcode": 6946, "parent_app_name": "Lim", "hostname": "met10", "fqdn": "acme.com", "sat_ipv4_addr": "10.10.10.10", "services": "", "environments": "prod", "migration status": false, "destination host": "" }
+    ],
+
+"servers": [
+    { "id": 1, "hostname": "lxrs8" },
+    { "id": 2, "hostname": "lxrs9" }
+], 
+
+"ansible_services": [
+    {  "hostname": "lxrs8", 
+        "services": [
+        { "source": "sysv", "state": "stopped", "name": "NetworkManager" }, 
+        { "source": "sysv", "state": "running", "name": "TaniumClient" }, 
+        { "source": "sysv", "state": "running", "name": "acpid" }, 
+        { "source": "sysv", "state": "running", "name": "anacron" }
+        ]
+    }, 
+    { "hostname": "lxrs9", 
+        "services": [
+            { "source": "sysv", "state": "stopped", "name": "NetworkManager9" }, 
+            { "source": "sysv", "state": "running", "name": "TaniumClient9" }, 
+            { "source": "sysv", "state": "running", "name": "acpid9" }, 
+            { "source": "sysv", "state": "running", "name": "anacron9" }
+            ]
+    }
+], 
+
+"ansible_packages": [
+    { "hostname": "lxrs8", 
+        "packages": [
+            { "name": "termcap", "source": "rpm", "epoch": 1, "version": "5.5", "release": "1.20006", "arch": "noarch" }, 
+            { "name": "libcap", "source": "rpm", "epoch": 1, "version": "1.10", "release": "26", "arch": "x86_64" },
+            { "name": "libgpg-error", "source": "rpm", "epoch": null, "version": "1.4", "release": "2", "arch": "x86_64" }
+        ] 
+    }, 
+    { "hostname": "lxrs9", 
+        "packages": [
+            { "name": "termcap", "source": "rpm", "epoch": 1, "version": "5.5", "release": "1.20006", "arch": "noarch9" }, 
+            { "name": "libcap", "source": "rpm", "epoch": 1, "version": "1.10", "release": "26", "arch": "x86_649" },
+            { "name": "libgpg-error", "source": "rpm", "epoch": null, "version": "1.4", "release": "2", "arch": "x86_649" }
+        ]  
+    }
+],
+"ansible_listeners": [
+    { "hostname": "lxrs8", 
+        "listeners": [
+            { "protocol": "tcp", "local_address": "127.0.0.1", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java" }, 
+            { "protocol": "tcp", "local_address": "127.0.0.2", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java"  },
+            { "protocol": "tcp", "local_address": "127.0.0.3", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java"  }
+        ] 
+    }, 
+    { "hostname": "lxrs9", 
+        "listeners": [
+            { "protocol": "tcp", "local_address": "127.0.0.4", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java" }, 
+            { "protocol": "tcp", "local_address": "127.0.0.5", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java"  },
+            { "protocol": "tcp", "local_address": "127.0.0.6", "local_port": 123, "state": "LISTEN", "pid": 1, "process": "java"  }
+        ]  
+    }
+],
+"ansible_processes": [
+    { "hostname" : "lxrs8",
+       "processes": [
+                        {
+                            "TTY": "?",
+                            "CPU_PERC": "0.0",
+                            "PID": "1",
+                            "MEM_PERC": "0.0",
+                            "COMMAND": " init [3]",
+                            "USER": "root",
+                            "STAT": "Ss"
+                        },
+                        {
+                            "TTY": "?",
+                            "CPU_PERC": "0.0",
+                            "PID": "2",
+                            "MEM_PERC": "0.0",
+                            "COMMAND": " [migration/0]",
+                            "USER": "root",
+                            "STAT": "S<"
+                        },
+                        {
+                            "TTY": "?",
+                            "CPU_PERC": "0.0",
+                            "PID": "3",
+                            "MEM_PERC": "0.0",
+                            "COMMAND": " [ksoftirqd/0]",
+                            "USER": "root",
+                            "STAT": "SN"
+                        },
+                        {
+                            "TTY": "?",
+                            "CPU_PERC": "0.0",
+                            "PID": "4",
+                            "MEM_PERC": "0.0",
+                            "COMMAND": " [events/0]",
+                            "USER": "root",
+                            "STAT": "S<"
+                        }
+        ]
+    }
+],
+
+"ansible_cronjobs": [
+    { "hostname" : "lxrs8", 
+     "cronjobs": {
+  
+                      "cronfiles": [
+  
+                          "/etc/cron.hourly/mcelog.cron",
+  
+                          "/etc/cron.daily/makewhatis.cron",
+  
+                          "/etc/cron.daily/rpm",
+  
+                          "/etc/cron.daily/prelink",
+  
+                          "/etc/cron.daily/mlocate.cron",
+  
+                          "/etc/cron.daily/logrotate",
+  
+                          "/etc/cron.daily/tmpwatch",
+  
+                          "/etc/cron.daily/0anacron",
+  
+                          "/etc/cron.weekly/makewhatis.cron",
+  
+                          "/etc/cron.weekly/0anacron",
+  
+                          "/etc/cron.monthly/0anacron"
+  
+                      ],
+  
+                      "var_spool": [],
+  
+                      "crontabs": [
+  
+                          {
+  
+                              "hour": "*",
+  
+                              "month": "*",
+  
+                              "command": "run-parts /etc/cron.hourly",
+  
+                              "user": "root",
+  
+                              "day": "*",
+  
+                              "minute": "01",
+  
+                              "weekday": "*"
+  
+                          },
+  
+                          {
+  
+                              "hour": "4",
+  
+                              "month": "*",
+  
+                              "command": "run-parts /etc/cron.daily",
+  
+                              "user": "root",
+  
+                              "day": "*",
+  
+                              "minute": "02",
+  
+                              "weekday": "*"
+  
+                          },
+  
+                          {
+  
+                              "hour": "4",
+  
+                              "month": "*",
+  
+                              "command": "run-parts /etc/cron.weekly",
+  
+                              "user": "root",
+  
+                              "day": "*",
+  
+                              "minute": "22",
+  
+                              "weekday": "0"
+  
+                          }
+                        ]
+      }
+  }
+],
+
+"ansible_users": [
+ { "hostname": "lxrs8", 
+    "users": [
+                {
+
+                    "username": "root",
+
+                    "shadow_must_change": "99999",
+
+                    "encrypted_password": "x",
+
+                    "login_shell": "/bin/bash",
+
+                    "home_directory": "/root",
+
+                    "uid": "0",
+
+                    "gid": "0"
+
+                },
+
+                {
+
+                    "username": " bin",
+
+                    "shadow_must_change": "99999",
+
+                    "encrypted_password": "x",
+
+                    "login_shell": "/sbin/nologin",
+
+                    "home_directory": "/bin",
+
+                    "uid": "1",
+
+                    "gid": "1"
+
+                }   
+        ]
+    }
+], 
+"ansible_groups": [
+    {"hostname": "lxrs8", 
+        "groups": [
+            {
+
+                "gid": "0",
+
+                "password": "x",
+
+                "group_list": "root",
+
+                "group_name": "root"
+
+            },
+
+            {
+
+                "gid": "1",
+
+                "password": "x",
+
+                "group_list": "root,bin,daemon",
+
+                "group_name": "bin"
+
+            }
+        ] 
+    }
+],
+
+"ansible_facts": [
+    {
+        "hostname": "lxrs8",
+        "id": 1,
+        "server_id": 2,
+        "ipv4_addr": null,
+        "dest_hostname": null,
+        "dest_ipv4_addr": null,
+        "facts": {
+            "ansible_distribution_version": "5.9",
+            "ansible_processor_cores": "1",
+            "ansible_memtotal_mb": "6603",
+            "ansible_architecture": "x86_64",
+            "ansible_selinux": null,
+            "ansible_kernel": "2.6.18-409.el5",
+            "ansible_mounts": [
+                {
+                    "uuid": "N/A",
+                    "size_total": 5200543744,
+                    "mount": "/",
+                    "size_available": 677298176,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-LogVol00",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 4160421888,
+                    "mount": "/var",
+                    "size_available": 471818240,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-varlv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 135018102784,
+                    "mount": "/opt",
+                    "size_available": 0,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-optlv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 2080194560,
+                    "mount": "/opt/maestro",
+                    "size_available": 1399447552,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-maestrolv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 2080194560,
+                    "mount": "/opt/Marimba",
+                    "size_available": 1902501888,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-marimbalv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 2080194560,
+                    "mount": "/home",
+                    "size_available": 1001832448,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-homelv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 2080194560,
+                    "mount": "/opt/patrol",
+                    "size_available": 1486925824,
+                    "fstype": "ext3",
+                    "device": "/dev/mapper/RootVG-patrollv",
+                    "options": "rw"
+                },
+                {
+                    "uuid": "N/A",
+                    "size_total": 103512064,
+                    "mount": "/boot",
+                    "size_available": 60471296,
+                    "fstype": "ext3",
+                    "device": "/dev/sda1",
+                    "options": "rw"
+                }
+            ],
+            "ansible_lvm": [
+                {
+                    "name": "patrollv",
+                    "size_g": "2.00",
+                    "vg": "RootVG"
+                },
+                {
+                    "name": "homelv",
+                    "size_g": "2.00",
+                    "vg": "RootVG"
+                },
+                {
+                    "name": "varlv",
+                    "size_g": "4.00",
+                    "vg": "RootVG"
+                },
+                {
+                    "name": "LogVol00",
+                    "size_g": "5.00",
+                    "vg": "RootVG"
+                }
+            ]
+        }
+    }
+ ]
+}

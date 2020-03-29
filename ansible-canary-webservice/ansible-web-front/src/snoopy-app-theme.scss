@@ -1,0 +1,30 @@
+@import '~@angular/material/theming';
+@import './theming/palette';
+@import './app/components/side-panel/side-panel-component-theme.scss';
+
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue.
+$snoopy-app-primary: mat-palette($mat-grey-black);
+$snoopy-app-accent:  mat-palette($mat-light-blue, A400, A100, A700);
+
+// The warn palette is optional (defaults to red).
+$snoopy-app-warn:    mat-palette($mat-orange);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$snoopy-app-theme: mat-light-theme($snoopy-app-primary, $snoopy-app-accent, $snoopy-app-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($snoopy-app-theme);
+@include side-panel-component-theme($snoopy-app-theme);
+
+// Include the theme styles for only specified components.

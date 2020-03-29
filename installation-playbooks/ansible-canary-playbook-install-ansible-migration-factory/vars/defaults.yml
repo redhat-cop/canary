@@ -1,0 +1,6 @@
+---
+tower_url: ""
+tower_verify_ssl: False
+tower_user: "admin"
+tower_org: "Default"
+amf_jt_disc_inv: "Demo Inventory" #Name of target inventory to use for Discovery Job Template

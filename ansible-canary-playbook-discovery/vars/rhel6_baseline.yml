@@ -1,0 +1,7 @@
+---
+# Baseline lists for RHEL6
+discovery_rhel6_pkg_baseline: []
+discovery_rhel6_svc_baseline: []
+discovery_rhel6_port_baseline: []
+discovery_rhel6_user_baseline: []
+discovery_rhel6_group_baseline: []

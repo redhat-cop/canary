@@ -1,0 +1,32 @@
+---
+amf_as_services: []
+
+amf_as_user_group:
+  users: []
+  groups: []
+
+amf_as_paths:
+  - "/opt/BESClient"
+  - "/etc/rc.d/rc2.d/SBESClientd"
+
+amf_as_packages:
+  - "BESClient"
+
+amf_as_ports: []
+
+amf_as_processes:
+  - "BESClient"
+
+amf_as_scores:
+  users: "0"
+  groups: "0"
+  services: "0"
+  paths: "2"
+  packages: "1"
+  ports: "0"
+  processes: "1"
+
+# Returned fields
+amf_as_discovered_app:
+  name: "IBM BigFix Agent"
+  desc: "Hosts identified as IBM BigFix Agent"

@@ -1,0 +1,389 @@
+---
+# Also includes postgres password
+- name: "Ensure deploy key data is available"
+  include_vars: "vars/secrets.yml"
+
+# - name: "Ensure EPEL repository is installed for package dependencies | RHEL7"
+#   package:
+#     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+#     state: "installed"
+#   when:
+#     - ansible_os_family == "RedHat"
+#     - ansible_distribution_major_version == "7"
+#   become: True
+
+- name: "Ensure webservice package dependencies are installed"
+  yum:
+    name: "{{ ws_pkgs }}"
+    enablerepo: "{{ rht_repos | join(',') }}"
+    state: "present"
+  become: True
+
+- name: "Ensure apache is installed"
+  package:
+    name: "{{ ws_apache_pkg }}"
+  become: True
+
+- name: "Ensure webservice group exists"
+  group:
+    name: "{{ ws_group }}"
+  become: True
+
+- name: "Ensure webservice user exists"
+  user:
+    name: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+    home: "{{ ws_user_home }}"
+    system: True
+  become: True
+
+- name: "Ensure webservice user's SSH directory exists"
+  file:
+    path: "{{ ws_user_home }}/.ssh"
+    state: "directory"
+    mode: "0700"
+    owner: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+  become: True
+
+- name: "Ensure deploy key exists"
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ ws_user_home }}/.ssh/{{ item.name }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+  with_items:
+    - "{{ ws_ssh_key }}"
+    - "{{ ws_ssh_key_pub }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: True
+
+- name: "Ensure deployment directories exist"
+  file:
+    path: "{{ item }}"
+    state: "directory"
+    mode: "0700"
+    owner: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+  with_items: "{{ ws_directories }}"
+  become: True
+
+- name: "Ensure maven install path exists"
+  file:
+    path: "{{ maven_install_path }}"
+    state: "directory"
+
+- name: "Ensure maven is installed"
+  unarchive:
+    src: "{{ maven_url }}"
+    dest: "{{ maven_install_path }}"
+    list_files: True
+    remote_src: True
+  register: "maven_install"
+  become: True
+
+- debug:
+    var: "maven_install.files"
+    verbosity: "1"
+
+- name: "Ensure maven path is set"
+  set_fact:
+    mvn_path: "{{ item }}"
+  with_items: "{{ maven_install.files }}"
+  when: "item | regex_search('^.*mvn$')"
+
+- name: "Ensure maven symbolic link exists"
+  file:
+    dest: "/usr/bin/mvn"
+    src: "{{ maven_install_path }}/{{ mvn_path }}"
+    state: "link"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: "Ensure postgresql-setup symbolic link exists"
+  file:
+    dest: "/usr/bin/postgresql-setup"
+    src: "/opt/rh/rh-postgresql96/root/usr/bin/postgresql-setup"
+    state: "link"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: "Ensure psql symbolic link exists"
+  file:
+    dest: "/usr/bin/psql"
+    src: "/opt/rh/rh-postgresql96/root/usr/bin/psql"
+    state: "link"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: "Ensure postgres libraries are linked"
+  file:
+    dest: "{{ item }}"
+    src: "/opt/rh/rh-postgresql96/root/usr/lib64/libpq.so.rh-postgresql96-5"
+    state: "link"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - "/usr/lib64/libpq.so.rh-postgresql96-5"
+    - "/usr/lib/libpq.so.rh-postgresql96-5"
+
+- name: "Ensure webservice code is available"
+  git:
+    accept_hostkey: "{{ ws_repo_accept_host_key }}"
+    repo: "{{ ws_repo_url }}"
+    dest: "{{ ws_user_home }}/webservice/repo"
+    version: "{{ ws_repo_version | default('HEAD') }}"
+    #key_file: "{{ ws_user_home }}/.ssh/{{ ws_ssh_key.name }}"
+    force: True
+  become: True
+  become_user: "{{ ws_user }}"
+
+# synchronize module preserves ownership,
+# delegation means command runs on managed node
+- name: "Ensure front-end is deployed from cache"
+  # reverting to raw synchronize via rsync due to issue in 2.8:
+  # https://github.com/ansible/ansible/issues/56629
+  # synchronize:
+  #   src: "{{ ws_user_home }}/webservice/repo/ansible-web-front/"
+  #   dest: "{{ ws_user_home }}/webservice/install/ng/"
+  command: 'rsync -av {{ ws_user_home }}/webservice/repo/ansible-web-front/ {{ ws_user_home }}/webservice/install/ng/'
+  delegate_to: "{{ inventory_hostname }}"
+  become: True
+
+- name: "Ensure front-end context root is set properly"
+  template:
+    src: "environment.prod.ts.j2"
+    dest: "{{ ws_user_home }}/webservice/install/ng/src/environments/environment.prod.ts"
+    mode: "0644"
+    owner: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Ensure webservice is deployed from cache"
+# reverting to raw synchronize via rsync due to issue in 2.8:
+# https://github.com/ansible/ansible/issues/56629
+  # synchronize:
+  #   src: "{{ ws_user_home }}/webservice/repo/ansible-web/"
+  #   dest: "{{ ws_user_home }}/webservice/install/java"
+  command: "rsync -av {{ ws_user_home }}/webservice/repo/ansible-web/ {{ ws_user_home }}/webservice/install/java"
+  delegate_to: "{{ inventory_hostname }}"
+  become: True
+  register: "ws_deployed"
+
+- name: "Ensure npm modules are installed"
+  npm:
+    path: "{{ ws_user_home }}/webservice/install/ng"
+  become: True
+  become_user: "{{ ws_user }}"
+  register: "npm_results"
+
+- name: "Build static webservice site for production"
+  command: 'node_modules/.bin/ng build --prod'
+  args:
+    chdir: "{{ ws_user_home }}/webservice/install/ng"
+    creates: "{{ ws_user_home }}/webservice/install/ng/dist"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Ensure front-end is deployed"
+# reverting to raw synchronize via rsync due to issue in 2.8:
+# https://github.com/ansible/ansible/issues/56629
+  # synchronize:
+  #   src: "{{ ws_user_home }}/webservice/install/ng/dist/"
+  #   dest: "/var/www/html/"
+  command: 'rsync -av {{ ws_user_home }}/webservice/install/ng/dist/ /var/www/html/'
+  delegate_to: "{{ inventory_hostname }}"
+  notify:
+    - "Restart apache"
+  become: True
+
+- name: "Setup PostgreSQL"
+  command: 'postgresql-setup initdb'
+  args:
+    #creates: /var/lib/pgsql/data/postgresql.conf
+    creates: "{{ postgres_home }}/postgresql.conf"
+  become: True
+
+- name: "Listen on addresses other than localhost"
+  lineinfile:
+    path: "{{ postgres_home }}/postgresql.conf"
+    regexp: '^listen'
+    insertafter: '^#listen'
+    line: "listen_addresses = '*'"
+  become: True
+  notify: "Restart postgresql"
+
+- name: "Ensure postgresql is configured for client access"
+  copy:
+    dest: "{{ postgres_home }}/pg_hba.conf"
+    src: "pg_hba.conf"
+  become: True
+  notify: "Restart postgresql"
+
+- name: "Run handlers"
+  meta: "flush_handlers"
+
+- name: "Ensure postgresql is enabled and started"
+  systemd:
+    enabled: True
+    state: "started"
+    name: "{{ postgres_service }}"
+  become: True
+
+- name: "Create the coalmine database"
+  postgresql_db:
+    name: "{{ ws_db_name }}"
+  become: True
+  become_user: "postgres"
+
+- name: "Create the coalmine database user"
+  postgresql_user:
+    db: "{{ ws_db_name }}"
+    name: "{{ ws_db_user }}"
+    password: "{{ ws_db_pwd }}"
+  become: True
+  become_user: "postgres"
+
+- name: "Grant privileges to coalmine database"
+  postgresql_privs:
+    database: "{{ ws_db_name }}"
+    privs: "ALL"
+    type: "database"
+    roles: "{{ ws_db_user }}"
+  become: True
+  become_user: "postgres"
+
+- name: "Grant privileges to coalmine tables and sequences"
+  postgresql_privs:
+    database: "{{ ws_db_name }}"
+    privs: "ALL"
+    type: "schema"
+    objs: "public"
+    roles: "{{ ws_db_user }}"
+  become: True
+  become_user: "postgres"
+
+- name: "Initial schema setup for database"
+  shell: 'psql {{ ws_db_name }} -f setup.sql'
+  args:
+    chdir: "{{ ws_user_home }}/webservice/install/java/sql"
+  become: True
+  become_user: "{{ ws_user }}"
+  environment:
+    PGPASSWORD: "{{ ws_db_pwd }}"
+
+- name: "Build middleware tier"
+  shell: '/usr/bin/mvn clean install'
+  args:
+    chdir: "{{ ws_user_home }}/webservice/install/java/com.redhat.ansible.web.parent"
+    creates: "{{ ws_user_home }}/webservice/install/java/com.redhat.ansible.web.parent/com.redhat.ansible.web.server2/target"
+  become: True
+  become_user: "{{ ws_user }}"
+  environment:
+    JAVA_HOME: "/etc/alternatives/jre_1.8.0_openjdk"
+
+- name: "Download postgresql JDBC driver"
+  get_url:
+    url: "{{ postgres_jdbc_download_url }}"
+    dest: "{{ ws_user_home }}/{{ postgres_jdbc_driver }}"
+    checksum: "md5:{{ postgres_jdbc_md5 }}"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Download wildfly"
+  get_url:
+    url: "{{ wildfly_download_url }}"
+    dest: "{{ ws_user_home }}/wildfly.tgz"
+    checksum: "md5:{{ wildfly_md5 }}"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Expand wildfly"
+  unarchive:
+    src: "{{ ws_user_home }}/wildfly.tgz"
+    dest: "{{ ws_user_home }}"
+    remote_src: True
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Distribute postgres JDBC driver installation script"
+  template:
+    src: "install-pg-db-module.j2"
+    dest: "{{ ws_user_home }}/install-pg-db-module"
+    owner: "{{ ws_user }}"
+    group: "{{ ws_group }}"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Install Coalmine service"
+  template:
+    src: "coalmine.service.j2"
+    dest: "/etc/systemd/system/coalmine.service"
+  become: True
+
+- name: "Deploy Camel webservice"
+  command: 'cp {{ coalmine_mvn_target }}/com.redhat.ansible.web.server2-2.0.0.war {{ wildfly_home }}/standalone/deployments/v1.war'
+  args:
+    creates: "{{ wildfly_home }}/standalone/deployments/v1.war"
+  become: True
+  become_user: "{{ ws_user }}"
+
+- name: "Install postgresql JDBC driver into wildfly"
+  command: 'bin/jboss-cli.sh --file={{ ws_user_home }}/install-pg-db-module'
+  args:
+    chdir: "{{ wildfly_home }}"
+    creates: "{{ wildfly_home }}/modules/org/postgres/main/module.xml"
+  become: True
+  become_user: "{{ ws_user }}"
+  when: "ws_deployed is changed"
+  notify: "Restart coalmine"
+  register: "pg_jdbc_driver"
+  changed_when: (pg_jdbc_driver.rc == "0") or
+                (pg_jdbc_driver.rc == "1")
+  ignore_errors: True
+
+- name: "Ensure Coalmine is enabled and started"
+  systemd:
+    enabled: True
+    state: "restarted"
+    name: "coalmine"
+  become: True
+
+- name: "Ensure firewall is open"
+  firewalld:
+    immediate: True
+    permanent: True
+    port: "{{ item }}"
+    state: "enabled"
+  with_items: "{{ ws_fw_ports }}"
+
+# should toss this whole thing in a block so we can set the following tasks to always
+# - name: "Ensure EPEL repository is removed"
+#   package:
+#     name: "epel-release"
+#     state: "absent"
+#   become: True
+
+- name: "Ensure deploy keys are removed"
+  file:
+    name: "{{ ws_user_home }}/.ssh/{{ item.name }}"
+    state: "absent"
+  become: True
+  with_items:
+    - "{{ ws_ssh_key }}"
+    - "{{ ws_ssh_key_pub }}"
+
+- name: "Ensure front-end code is removed"
+  file:
+    path: "{{ item }}"
+    state: "absent"
+  with_items:
+    - "{{ ws_user_home }}/webservice/install/ng/dist"
+    - "{{ ws_user_home }}/webservice/install/ng"

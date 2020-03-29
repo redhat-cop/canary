@@ -1,0 +1,5 @@
+---
+- name: "Get sudoers facts"
+  scan_sudoers:
+
+# scan_sudoers returns ansible_facts[sudoers]

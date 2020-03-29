@@ -1,0 +1,7 @@
+---
+# Baseline lists for Solaris
+discovery_solaris_pkg_baseline: []
+discovery_solaris_svc_baseline: []
+discovery_solaris_port_baseline: []
+discovery_solaris_user_baseline: []
+discovery_solaris_group_baseline: []

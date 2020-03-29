@@ -1,0 +1,30 @@
+<div vertical="true">
+  <a [routerLink]="['/home']" class= "home"> Home </a>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Discovered Facts
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <ul>
+      <li class= "first">
+        <a [routerLink]="['/packages']"> Packages</a>
+      </li>
+      <li>
+        <a [routerLink]="['/processes']"> Processes </a>
+      </li>
+      <li>
+        <a [routerLink]="['/listeners']"> Listeners </a>
+      </li>
+      <li>
+        <a [routerLink]="['/services']"> Services  </a>
+      </li>
+      <li>
+        <a [routerLink]="['/usersgroups']"> Local Users & Groups </a>
+      </li>
+      <li>
+        <a [routerLink]="['/facts']"> General Facts</a>
+      </li>
+    </ul>
+  </mat-expansion-panel>
+</div>

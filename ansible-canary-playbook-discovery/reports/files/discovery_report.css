@@ -1,0 +1,100 @@
+body {
+  font-family: "Overpass Light", "Arial";
+}
+
+h1.title {
+  margin-top: 75px;
+}
+
+img.head {
+  width: 100%;
+  height: 40%;
+}
+
+img.details-head {
+  height: auto;
+  width: 7%;
+  float: right;
+  margin-left: auto;
+  margin-right: 1%;
+  margin-top: -50px;
+}
+
+img.foot {
+  height: auto;
+  width: 7%;
+  float: right;
+  margin-left: auto;
+  margin-right: 1%;
+  margin-top: 15px;
+  margin-bottom: 30px;
+}
+
+ul {
+  list-style-type: none;
+  font-family: "Overpass Light", "Arial";
+  font-size: 24px;
+  list-style-position: inside;
+}
+
+li {
+  padding: 2px;
+}
+
+/* toc list links */
+ul a {
+  color: black;
+  text-decoration: none;
+}
+ul a:link {
+  color: black;
+  text-decoration: none;
+}
+
+ul a:hover {
+  color: red;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+a:active {
+  color: darkred;
+  text-decoration: underline;
+}
+
+/* table stuff */
+table {
+  font-family: "Overpass Light", "Arial";
+  border-collapse: collapse;
+  width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 60px;
+}
+
+thead {
+  background-color: crimson;
+  color: white;
+}
+
+td, th {
+  border: 2px solid black;
+  padding: 8px;
+  border-collapse: collapse;
+}
+
+/* table links */
+table a {
+  color: black !important;
+  text-decoration: none !important;
+}
+
+table a:hover {
+  color: red !important;
+  text-decoration: none;
+}
+
+table a:active {
+  color: black;
+  text-decoration: underline !important;
+}

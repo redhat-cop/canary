@@ -1,0 +1,45 @@
+  {
+  "hostname" : "lxvs6",
+  "packages": [
+        {
+            "name": "termcap",
+            "source": "rpm",
+            "epoch": 1,
+            "version": "5.5",
+            "release": "1.20060701.1",
+            "arch": "noarch"
+        },
+        {
+            "name": "libcap",
+            "source": "rpm",
+            "epoch": null,
+            "version": "1.10",
+            "release": "26",
+            "arch": "x86_64"
+        },
+        {
+            "name": "libgpg-error",
+            "source": "rpm",
+            "epoch": null,
+            "version": "1.4",
+            "release": "2",
+            "arch": "x86_64"
+        },
+        {
+            "name": "zip",
+            "source": "rpm",
+            "epoch": null,
+            "version": "2.31",
+            "release": "2.el5",
+            "arch": "x86_64"
+        },
+        {
+            "name": "libgtop2",
+            "source": "rpm",
+            "epoch": null,
+            "version": "2.14.4",
+            "release": "8.el5_4",
+            "arch": "x86_64"
+        }
+  ]
+}
