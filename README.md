@@ -71,17 +71,17 @@ We can currently identify the following systems/applications:
 - WebMethods Integration Server
 
 ## Installation and Usage
-1. Install Ansible Tower
-2. Build a target inventory
-3. Clone the Canary installation project:  https://github.com/boogiespook/canary
-4. cd to installation-playbooks/ansible-canary-playbook-install-ansible-migration-factory/
+1. [Install Ansible Tower](https://docs.ansible.com/ansible-tower/latest/html/quickinstall/index.html)
+2. [Build a target inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html)
+3. [Clone the Canary installation project](https://github.com/redhat-cop/canary)
+4. cd to `installation-playbooks/ansible-canary-playbook-install-ansible-migration-factory/` 
 5. Follow the instructions in the README.md file to install all of the components into Ansible Tower
 6. Review the “Ansible Migration Factory - Discovery” job template in Ansible Tower and ensure it has been installed properly
- - You may want to set the “slice” setting on the job template to the number of nodes in your Ansible Tower cluster or the Instance Group you intend to leverage.
- - You may also want to tweak the default setting of ‘50’ forks on the job template depending on the Tower environment
+   - You may want to set the “slice” setting on the job template to the number of nodes in your Ansible Tower cluster or the Instance Group you intend to leverage.
+   - You may also want to tweak the default setting of ‘50’ forks on the job template depending on the Tower environment
 7. Ensure the tower-cli and jmespath has been installed to the default Ansible Tower virtual environment on each of your Ansible Tower nodes.  
-Note: this will automatically be done for you as long as the ‘vars/discovery_vars.yml’ contains “discovered_host_install_prereqs: True”, which is the default.
+Note: this will automatically be done for you as long as the `vars/discovery_vars.yml` contains `discovered_host_install_prereqs: True`, which is the default.
 
-Some discovery roles have prerequisite requirements based on the particular Operating System target.  A common setting has been created to allow for installing requirements for any required module dependencies to be installed to the hosts.  This setting is in “vars/discovery_vars.yml” and “discovery_install_prereqs: False” by default.  If you have permission from your customer to make changes, you may want to switch this setting to True to enable installation of any required packages on the target Operating Systems.  The playbook will make no modifications to the target systems during a run by default.
+Some discovery roles have prerequisite requirements based on the particular Operating System target.  A common setting has been created to allow for installing requirements for any required module dependencies to be installed to the hosts.  This setting is in `vars/discovery_vars.yml` and `discovery_install_prereqs: False` by default.  If you have permission from your customer to make changes, you may want to switch this setting to True to enable installation of any required packages on the target Operating Systems.  The playbook will make no modifications to the target systems during a run by default.
 
 Launch the “Ansible Migration Factory - Discovery” job template from your Ansible Tower and you are on your way
