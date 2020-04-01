@@ -10,5 +10,5 @@ rpt_skip_validator: True
 ## If targeting an isolated instance group you should have a key set from the isolated instances to the report server
 discovery_report_server: ""
 rpt_images:
-  - "RH_Consulting_header_2700x750_grey.png"
-  - "RedHat-Header.png"
+  - "logo1.png"
+  - "logo2.png"
