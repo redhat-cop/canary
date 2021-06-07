@@ -13,7 +13,7 @@
         <camel.version>2.17.0</camel.version>
         <slf4j.version>1.7.7</slf4j.version>
         <cdi-api.version>1.2</cdi-api.version>
-        <logback.version>1.1.7</logback.version>
+        <logback.version>1.2.0</logback.version>
         <drools.version>6.3.0.Final</drools.version>
         <guava.version>19.0</guava.version>
         <junit.version>4.12</junit.version>
